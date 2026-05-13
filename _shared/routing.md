@@ -45,13 +45,14 @@
 ### claude-main
 - **용도**: 메인 코딩, 디버깅, 기획, 요구사항 정의, 설계 문서, 사용자 스토리, 아키텍처, 전략 수립
 - **결과물**: 코드 (구현·수정·diff), 설계 문서, 구조도, 의사결정 근거
-- **호출 명령** (예시 — 환경에 맞게 조정):
-  ```bash
-  claude --print "$(cat tasks/<task>/workers/claude-main/brief.md)" \
-    > tasks/<task>/workers/claude-main/result.md
-  ```
-- **비용**: 있음 (별도 Claude 호출). Claude API/구독 쿼터 차감 → 승인 필요
-- **파일 쓰기**: ❌ 직접 X. Orchestrator가 응답을 받아 `result.md`에 기록
+- **호출 명령**: Claude Code 내장 **Task tool (sub-agent)**
+  - `subagent_type`: `claude-main` (`.claude/agents/claude-main.md`에 정의)
+  - `prompt`: brief.md 내용 그대로 전달
+  - `model`: agent 정의 파일 frontmatter의 `model: opus`가 자동 적용 (claude-opus-4-7)
+  - `description`: 짧은 작업명 (3~5 단어)
+- **권한**: 메인 Claude Code 세션의 권한 모드 상속. `--dangerously-skip-permissions` (yolo) 모드면 sub-agent도 yolo로 작동. 단 MultiAgent 시스템 게이트(`workers_approved`, 외부 쓰기 4조건)는 별개로 유지된다
+- **비용**: 있음 (Opus 4.7 sub-agent 호출. 별도 모델 호출이며 비용·쿼터 대상) → 승인 필요
+- **파일 쓰기**: ❌ 직접 X. Task tool이 반환한 텍스트를 Orchestrator가 받아 `result.md`에 기록
 - ※ Orchestrator의 내부 추론과 다름.
 
 ### codex-main
@@ -103,7 +104,7 @@
 
 각 worker가 실제 어떤 모델로 도는지 정리. 사용자가 매번 명시할 필요는 없으며, 아래 기본이 자동 적용된다.
 
-- **claude-main**: `claude-opus-4-7` (기본). 호출 시 `claude --print --model claude-opus-4-7 ...` 형태로 명시한다.
+- **claude-main**: `claude-opus-4-7` (기본). Task tool sub-agent로 호출하며 `.claude/agents/claude-main.md` frontmatter의 `model: opus`가 자동 적용된다.
 - **codex-main / codex-critic**: 사용자의 `~/.codex/config.toml` 기본값이 자동 적용된다 (예: `gpt-5.5` + reasoning effort `high`). MCP 호출 시 `model` 파라미터를 비워두면 그대로 사용된다.
   - 가벼운 작업은 `profile: lightweight`로 전환 가능 (예: `gpt-5.4-mini`)
   - 작업 성격상 다른 모델이 필요하면 brief.md에 명시

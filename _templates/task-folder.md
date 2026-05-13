@@ -90,11 +90,11 @@ wc -w "$ROOT/tasks/$TASK/workers/$ROLE/brief.md"   # 영문 단어수 ≤ 240
 
 #### 5-3. worker 호출 (`_shared/routing.md`의 호출 명령 참조)
 
-- **claude-main**: `claude --print` CLI로 별도 세션 호출. Orchestrator가 응답을 `result.md`에 기록
-  ```bash
-  claude --print "$(cat tasks/<task>/workers/claude-main/brief.md)" \
-    > tasks/<task>/workers/claude-main/result.md
-  ```
+- **claude-main**: Claude Code 내장 **Task tool (sub-agent)** 호출
+  - `subagent_type`: `claude-main` (`.claude/agents/claude-main.md`에 정의)
+  - `prompt`: brief.md 내용 그대로
+  - `model`: agent frontmatter `model: opus` 자동 적용
+  - 응답 텍스트를 Orchestrator가 받아 `result.md`에 기록
 - **gemini**: `mcp__gemini__*` 또는 `mcp__gemini-pro__*` MCP 도구 호출. Orchestrator가 응답을 `result.md`에 기록
 - **codex-main / codex-critic**: `mcp__codex__codex` MCP 도구 호출
   - `prompt`: brief.md 내용 그대로
