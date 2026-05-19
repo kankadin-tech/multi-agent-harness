@@ -108,7 +108,7 @@
 - **codex-main / codex-critic**: 사용자의 `~/.codex/config.toml` 기본값이 자동 적용된다 (예: `gpt-5.5` + reasoning effort `high`). MCP 호출 시 `model` 파라미터를 비워두면 그대로 사용된다.
   - 가벼운 작업은 `profile: lightweight`로 전환 가능 (예: `gpt-5.4-mini`)
   - 작업 성격상 다른 모델이 필요하면 brief.md에 명시
-- **gemini**: 기본 도구는 `mcp__gemini-pro__*` (모델 `gemini-3.1-pro-high`). 빠른 응답이 필요하면 `mcp__gemini__*` (Flash) 사용.
+- **gemini**: 기본 도구는 `mcp__gemini-pro__*` (모델 `gemini-3.1-pro-low`). 빠른 응답이 필요하면 `mcp__gemini__*` (Flash) 사용. `gemini-3.1-pro-high`는 로컬 프록시에서 `400 INVALID_ARGUMENT`가 재현되어 **기본·폴백 경로에서 제외**(사용자 명시 요청 시만). 근거: `_shared/learnings.md` [2026-05-15] · `design-basis.md` D4.
 
 이 정책은 사용자별 config에 따라 달라질 수 있다 — starter clone 받은 학습자는 본인의 `~/.codex/config.toml` 기본값을 한 번 확인하고 자기 환경에 맞게 조정한다.
 
