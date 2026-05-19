@@ -6,7 +6,7 @@
 ## Execution Context (codex-main / codex-critic 필수)
 
 ```yaml
-target_repo: <절대 경로>      # 예: /Users/soonho/VSCodeWorkspace/myrepo. 없으면 N/A
+target_repo: /absolute/path/to/repo    # 작업 대상 절대 경로 (없으면 N/A)
 write_scope: none             # none | tasks-only | "src/**, tests/**" 등 패턴
                               # 외부 repo 쓰기는 task.md workers_approved에 별도 승인 필요
 ```
