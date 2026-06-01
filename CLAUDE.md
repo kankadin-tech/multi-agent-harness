@@ -28,6 +28,8 @@ Orchestrator (Claude Code session, internal reasoning)
 8. 검증 결과를 `log.md`에 append (`[VERIFICATION]` 태그)
 9. 완료 후 교훈 추가 (분류): **시스템 운영 자체**에 대한 일반 교훈 → `_shared/learnings.md`(추적·공개). **특정 외부 프로젝트 한정**(mat·hwpx 등) → `_local/learnings.md`(git 추적 안 함, 없으면 생성). `_local/learnings.md`는 명시 요청 없이는 로드하지 않는다.
 
+> **기존 작업 재개 시**(새 세션 포함)는 1번부터가 아니라 `_shared/orchestrator-rules.md` §3 **재진입 프로토콜**을 먼저 따른다 (재정박 → 분기 → 에러 후 진행).
+
 ## Context Rules
 
 | 파일 | 제한 (측정 가능 기준) | 목적 |

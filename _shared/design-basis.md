@@ -27,6 +27,7 @@
 | Latent briefing (task-guided 압축) | brief = 그 worker의 그 작업용으로 재구성 (텍스트 근사, KV 불가) | "앞 작업 요약 그대로 전달" 금지 |
 | Context degradation: Clash | 문서 충돌 시 권위 우선순위로 해소 | 권위순위(§3) 유지 |
 | project-development: single→multi 승격 | routing.md 최소 set, 판단 어려우면 claude-main부터 | 기본 단일, 필요 시만 확장 |
+| Fan-out/Fan-in + 작업 재진입 | routing.md 토폴로지표·Fan-in 규칙, orchestrator-rules §3 | 병렬 통합·재진입 분기는 기존 append-only+provenance·never-trust-upstream 재사용. 새 원칙 아님 |
 
 ## 2. 권위 우선순위 (Context Clash 해소 규칙)
 
@@ -40,6 +41,7 @@
 - **D3 (R5) context.md 구조** = 4섹션 유지. 레퍼런스 5단(Intent/Files/Decisions/State/Next)은 *압축/핸드오프 체크리스트*지 context.md 템플릿 아님. `Files Modified/Decisions Made` 헤딩 도입 금지(히스토리 변질 → log.md 역할 침범). codex-critic 검증 완료. (2026-05-15)
 - **D4** gemini는 **단일 브리지 `mcp__gemini-pro__*` 하나만** 사용 (CLI 래퍼 `mcp__gemini__*`는 폐기 예정 — 폐기 시 잔존 참조는 즉시 호출 실패). 기본 모델 = `pro-low`, 빠른 경로 = 같은 브리지 `model: gemini-3-flash`, 폴백 = pro-low → flash. `pro-high`는 로컬 프록시 `400 INVALID_ARGUMENT`가 재현되어 기본·폴백 경로에서 제외(명시 요청 시만). 폴백 모델의 시스템 사실 주장은 권위문서로 교차검증 후 채택. (근거 갱신 2026-05-19 C1: learnings.md [2026-05-15] — pro-high 재현 실패, 동일 프록시 pro-low 정상. 2026-05-20 C2: gemini-mcp(CLI) 폐기 → 단일 gemini-pro 브리지로 통일, Flash는 model 파라미터. 이전 결정: 2-브리지(`mcp__gemini__*` Flash + `mcp__gemini-pro__*` Pro), 폴백 pro-high → pro-low → Flash)
 - **D5** MultiAgent 작업은 인터랙티브 세션 전용, worktree/백그라운드 세션 금지. (orchestrator-rules.md §1)
+- **D6** 작업 재진입 프로토콜(orchestrator-rules §3) + 토폴로지 4패턴(routing.md) 채택, Supervisor·Hierarchical Delegation **배제**. 배제 대상은 *개념*이 아니라 *추가 계층*임에 유의 — 기존 단일 orchestrator를 Supervisor로 재명명하는 게 아니라, 그 위에 (Supervisor) 별도 long-lived 조정자 worker/런타임 동적분배 계층, (Hierarchical) worker가 worker를 부르는 재귀 위임 트리를 추가하는 것을 배제한다. 근거: (a) 단일 orchestrator, (b) worker간 무통신(전부 orchestrator 경유+승인 게이트), (c) file-as-memory(런타임 0). 추가 계층은 (b)(c)와 승인·비용·감사를 무너뜨림. 재진입 프로토콜은 콜드세션 재정박 공백(사용자 보고 통증)을 메움. 부분재실행·에러처리·Fan-in 충돌해소는 모두 기존 불변식(append-only+provenance, never-trust-upstream, 최소 worker set)의 재배치 — 새 원칙 아님. 출처: harness(revfactory) 6패턴 중 4개 선별, tasks/harness-vup-reentry/ (codex-critic 검토 반영). 매뉴얼 동기화는 후속(manual sync pending). (2026-06-01)
 
 ## 4. 불변식
 

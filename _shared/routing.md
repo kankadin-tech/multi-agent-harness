@@ -30,15 +30,26 @@
 3. **검증은 한 번만**: codex-critic은 작업당 1회 원칙. 재호출은 검증 실패 시만
 4. **gemini는 명시적 트리거 시만**: 멀티모달 또는 "제3자 시각의 검토 필요" 명시 없으면 호출 금지
 
-## 병렬 / 순차 정책
+## 토폴로지 패턴 (worker를 어떻게 엮을까)
 
-| 패턴 | 적용 |
-|------|------|
-| 순차 (Pipeline) | 기본. claude-main → codex-critic → claude-main 처럼 결과 인계 |
-| 병렬 (Parallel) | 서로 독립된 산출물일 때만. 예: claude-main(코드) + gemini(이미지 분석) |
-| 금지 | 같은 입력에 같은 종류 worker 동시 호출 (예: claude-main 2개) |
+decision tree로 "누구를" 고른 뒤, "어떻게 엮을지" 고른다. **단일 orchestrator 구조에 맞는 4패턴만** 쓴다.
 
-병렬 호출 시: 각 worker `brief.md`에 다른 worker 결과를 참조하지 않음을 명시.
+| 패턴 | 언제 | 이 시스템에서 |
+|------|------|-------------|
+| Pipeline (순차) | 앞 결과가 뒤 입력 | 기본. claude-main → codex-critic → claude-main(반영) |
+| Fan-out/Fan-in (병렬→통합) | 서로 독립된 산출물 여럿을 하나로 통합 | 예: claude-main(코드) ∥ gemini(이미지). 각 brief에 "타 worker 결과 미참조" 명시. 통합은 아래 Fan-in 규칙 |
+| Expert Pool (전문가 선택) | 작업 성격에 맞는 worker만 | 새 실행 패턴이 아니라 **worker 선택 정책** — 위 decision tree + 최소 worker set이 곧 이 패턴 |
+| Producer-Reviewer (생성+게이트) | 산출물 품질 검증 필요 | claude-main(생성) → codex-critic(adversarial 게이트) |
+
+**금지**: 같은 입력에 같은 종류 worker 동시 호출 (예: claude-main 2개).
+**배제**: Supervisor(별도 long-lived 조정자 worker/런타임 동적분배 계층 추가)·Hierarchical Delegation(worker가 worker를 부르는 재귀 위임)은 단일 orchestrator·worker간 무통신·file-as-memory와 충돌 → 미사용. 근거: design-basis D6.
+
+### Fan-in 규칙 (병렬 결과 통합)
+
+병렬 worker 결과를 orchestrator가 하나로 합칠 때:
+1. 각 worker 원문을 `result.md`에 그대로 보존 (요약본만 남기지 말 것 — telephone game 방지)
+2. 결과가 충돌하면 삭제 금지 → 양쪽 출처 병기, 권위 우선순위/사실검증으로 해소, `log.md` [DECISION]에 근거 기록
+3. 통합 결론 한 줄을 `context.md`에 기록
 
 ## Worker 역할 상세
 

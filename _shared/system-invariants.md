@@ -18,6 +18,7 @@
 | INV8 | 인터랙티브 전용 + worktree/백그라운드 세션 금지 규칙이 orchestrator-rules.md와 매뉴얼에 모두 존재 | D5 위반 |
 | INV9 | gemini 기본 모델이 routing.md·design-basis.md D4에서 `gemini-3.1-pro-low`로 일치하고, `pro-high`가 기본·폴백 기본 경로가 아님 (매뉴얼도 pro-high 비권장 유지) | C1 재발 — 정본이 known-bad pro-high를 기본 호출 (D4 위반) |
 | INV10 | 폐기 도구의 **호출형** `mcp__gemini__gemini_*`(prompt/vision 등)가 routing.md·task-folder.md·CLAUDE.md에 없음. `mcp__gemini__*` 잔여 언급은 **폐기 안내 문맥에서만** (호출 명령·예시·「또는」 선택지로 등장 금지) | C2 재발 — gemini-mcp 폐기 시 잔존 호출 참조가 즉시 실패 (D4 위반) |
+| INV11 | 재진입 프로토콜이 orchestrator-rules.md §3 **와** CLAUDE.md Task Lifecycle 포인터에 **둘 다** 존재. routing.md 토폴로지표에 4패턴(Pipeline/Fan-out·in/Expert Pool/Producer-Reviewer) 모두 존재하고, Supervisor·Hierarchical은 "배제" 줄에만 등장(채택표 행으로 등장 금지) | D6 위반 — 재진입/패턴 규정 유실 또는 배제 패턴 부활 |
 
 ## 자가 점검 스크립트
 
@@ -61,6 +62,16 @@ echo "INV10 폐기 도구 호출형 mcp__gemini__gemini_* (출력 없어야 PASS
 grep -rn 'mcp__gemini__gemini_' "$ROOT/_shared/routing.md" "$ROOT/_templates/task-folder.md" "$ROOT/CLAUDE.md"
 echo "INV10b mcp__gemini__* 잔여 언급 — 전부 '폐기' 안내 문맥이어야 (호출·예시·「또는」 선택지면 FAIL)"
 grep -rn 'mcp__gemini__' "$ROOT/_shared/routing.md" "$ROOT/_templates/task-folder.md" "$ROOT/CLAUDE.md"
+
+echo "INV11a 재진입: orchestrator-rules §3 + CLAUDE.md 포인터 둘 다 (둘 다 PASS 떠야)"
+grep -q '재진입 프로토콜' "$ROOT/_shared/orchestrator-rules.md" && echo " orchestrator-rules PASS" || echo " orchestrator-rules FAIL"
+grep -q '재진입 프로토콜' "$ROOT/CLAUDE.md" && echo " CLAUDE.md PASS" || echo " CLAUDE.md FAIL"
+echo "INV11b 토폴로지 4패턴 모두 존재 (4개 PASS 떠야)"
+for p in 'Pipeline' 'Fan-out/Fan-in' 'Expert Pool' 'Producer-Reviewer'; do
+  grep -q "$p" "$ROOT/_shared/routing.md" && echo " $p PASS" || echo " $p FAIL"
+done
+echo "INV11c Supervisor/Hierarchical 은 '배제' 줄에만 (배제 아닌 등장 0이어야 PASS)"
+grep -nE 'Supervisor|Hierarchical' "$ROOT/_shared/routing.md" | grep -v '배제' || echo " (배제 외 등장 없음 = PASS)"
 ```
 
 ## 전면 재감사가 필요한 경우 (이 점검으로 부족)
