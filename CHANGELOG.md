@@ -1,7 +1,36 @@
 # Changelog
 
-이 파일은 MultiAgent orchestration 시스템의 주요 변경을 기록한다.
+이 파일은 multi-agent-starter **패키지/배포**의 버전 이력이다.
+**설치된 시스템의 동작** 변경 이력은 생성된 폴더의 `CHANGELOG.md`
+(정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
+
+## [2.0.0] - 미배포 (PR 머지 시 태깅)
+
+**Breaking**: 배포 방식을 "clone → 루트 파일 그대로 사용"에서 **생성기 + 플러그인**으로
+전환. 이제 repo는 시스템 그 자체가 아니라 시스템을 만들어 주는 도구다.
+
+### Added
+- `generator/init.py` — flavor·대상 지정 결정적 생성기 (tasks/·_local/ 보존, dry-run, `--yes`, guard).
+- `generator/validate.py` — flavor별 불변식 자가점검 (claude 8 / codex 9), `init`이 설치 후 자동 호출.
+- `generator/build_zip.py` — 플러그인 없이 쓰는 자립형 ZIP(run.command/run.bat + 한글 README), 재현가능 빌드.
+- `generator/templates/{claude,codex}/` — 두 flavor 정본 템플릿.
+- `generator/sync_claude_template.py` — 루트(Claude 정본)에서 `templates/claude` 재생성 + drift 가드.
+- `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json` — Claude Code·Codex 플러그인 매니페스트.
+- `skills/configure-multiagent/` — "멀티 에이전트 시스템 구성해줘" front door.
+- `LICENSE` — MIT.
+
+### Changed
+- 배포: clone → 플러그인(`/plugins` 마켓플레이스) / ZIP fallback.
+- 루트 문서(README/CHANGELOG/KNOWN_ISSUES)를 repo front-page·패키지 이력으로 분리. 설치된 타깃용 동명 문서는 `templates/` 에 독립 정본으로 둔다.
+
+### Note
+- 설치되는 시스템의 **동작**은 1.0.1 라인을 잇는다 — 이번 변경은 *배포/패키징*이지 시스템 규칙 변경이 아니다.
+
+---
+
+> 아래 1.0.x는 generator 전환 이전, **repo가 곧 시스템**이던 시기의 릴리스 이력이다.
+> 설치 시스템 동작 이력은 이후 템플릿 CHANGELOG에서 이어진다.
 
 ## [1.0.1] - 2026-06-01
 
@@ -39,5 +68,6 @@
 ### Verification
 - 배선(INV11a/b/c) PASS · 회귀 없음, 탁상 분기 커버리지, 실전 콜드세션 3/3 PASS, codex-critic adversarial 리뷰 5 ISSUE 반영.
 
+[2.0.0]: https://github.com/netwaif/multi-agent-starter/releases/tag/v2.0.0
 [1.0.1]: https://github.com/netwaif/multi-agent-starter/releases/tag/v1.0.1
 [1.0.0]: https://github.com/netwaif/multi-agent-starter/releases/tag/v1.0.0

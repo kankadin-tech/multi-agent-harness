@@ -1,94 +1,95 @@
-# MultiAgent — Claude · Codex · Gemini Orchestration Starter
+# multi-agent-starter
 
-Claude Code를 오케스트레이터로 두고 Claude·Codex·Gemini를 워커로 호출하는 **파일 기반 멀티에이전트 시스템**.
+파일 기반 멀티에이전트 오케스트레이션 시스템 **생성기**. Claude Code 또는 Codex를
+오케스트레이터로 두는 file-as-memory 멀티에이전트 시스템을 원하는 폴더에 결정적으로 만든다.
 
-## 핵심 아이디어
+> v2부터 "clone 후 그대로 사용"이 아니라 **플러그인/생성기**로 배포한다.
+> 설치 후 자연어 한 마디 — "멀티 에이전트 시스템 구성해줘" — 면 끝.
 
-- **Orchestrator = Claude Code 세션** (이 폴더 안에서 실행 시 `CLAUDE.md` 자동 적용)
-- **Workers** = 외부 모델 호출. 모두 승인 게이트 통과 필요.
-  - `claude-main` — 메인 코딩·디버깅·설계·아키텍처·전략
-  - `codex-main` — 보조 구현·코드 분석·테스트·로컬 검증·이미지 생성
-  - `codex-critic` — `claude-main` 산출물 리뷰·비평 (Codex의 주된 역할)
-  - `gemini` — 이미지·긴 문서·제3자 시각의 검토
-- **Memory = filesystem.** 런타임 상태 없음. 모든 결정·승인·검증이 파일로 남는다.
+## 무엇을 만들어 주나
 
-## 폴더 구조
+선택한 **flavor**에 맞는 시스템 파일 한 세트를 대상 폴더에 생성한다:
 
-```
-~/VSCodeWorkspace/MultiAgent/
-├── CLAUDE.md              # 운영 규칙 전문 (이 폴더 안에서 claude 실행 시만 적용)
-├── _shared/
-│   ├── routing.md             # worker 선택 decision tree + 호출 명령
-│   ├── approval-policy.md     # 승인 게이트 정책 (claude-main 포함)
-│   ├── orchestrator-rules.md  # 세션 시작 시 자체 점검 규칙
-│   └── learnings.md           # 시스템 일반 재사용 교훈 (추적·공개, append-only)
-├── _templates/
-│   ├── task.md            # status, goal, constraints, planned_workers, workers_approved
-│   ├── context.md         # 현재 스냅샷 ≤ 1500자 / 300단어
-│   ├── worker-brief.md    # ≤ 1200자 / 240단어, target_repo + write_scope
-│   ├── worker-result.md   # Verification Checklist 포함
-│   ├── log.md             # append-only 이력
-│   └── task-folder.md     # 새 작업 폴더 생성 가이드
-└── tasks/                 # 작업별 폴더 (동적 생성)
-    └── <task-name>/
-        ├── task.md
-        ├── context.md
-        ├── log.md
-        ├── sources/       # 원본 자료 (선택)
-        ├── workers/<role>/
-        │   ├── brief.md
-        │   └── result.md
-        └── artifacts/     # 산출물 원본 (선택)
-```
+| flavor | 오케스트레이터 | 워커 풀 |
+|--------|----------------|---------|
+| `claude` | Claude Code 세션 | claude-main · codex-main · codex-critic · gemini |
+| `codex`  | Codex 세션 | codex-main · claude-critic · gemini |
 
-> `_local/` (git 추적 안 함, clone 시 빈 폴더): 작성자의 **프로젝트 특화** 교훈
-> (`_local/learnings.md`)이 여기 쌓인다. 공개 starter에는 **시스템 일반** 교훈만
-> `_shared/learnings.md`로 배포된다. 분류 규칙은 `_shared/learnings.md` 헤더 참조.
+생성되는 시스템에 포함되는 것:
 
-## 사용 시작
+- **승인 게이트** — 모든 워커(외부 모델) 호출 전 명시 승인
+- **작업 재진입 프로토콜** — 콜드세션 복귀 시 재정박 → 분기 판단 → 에러 후 진행
+- **토폴로지 4패턴** — Pipeline / Fan-out·Fan-in / Expert Pool / Producer-Reviewer
+- **불변식 자가점검** — 생성 직후 `validate.py`가 구조를 검증(PASS/FAIL)
+- **file-as-memory** — 런타임 상태 0, 모든 결정·승인·검증이 파일로 남는다
+
+생성은 **결정적**이다 — 번들 템플릿을 그대로 복사하며, 모델이 시스템 파일을 창작하지 않는다.
+
+## 설치 & 사용
+
+Claude Code·Codex 모두 **동일한 플러그인 흐름**이다:
+
+1. 호스트에서 `/plugins` 실행
+2. **Add Marketplace** 선택 → 저장소 `netwaif/multi-agent-starter` 입력
+3. 목록에서 **multi-agent-starter** 를 Enter로 설치·활성화
+4. `멀티 에이전트 시스템 구성해줘` → flavor·대상 폴더를 묻고 생성
+
+### ZIP (플러그인 없이 — 최소 기술)
+
+1. [Releases](https://github.com/netwaif/multi-agent-starter/releases)에서 `multi-agent-starter-<버전>.zip` 받아 압축 해제
+2. macOS `run.command` / Windows `run.bat` 더블클릭 (또는 폴더에서 `python3 init.py`)
+3. 메뉴에서 flavor·대상 폴더 선택
+
+### 직접(개발자) — 생성기 호출
 
 ```bash
-cd ~/VSCodeWorkspace/MultiAgent
-claude
+python3 generator/init.py --flavor <claude|codex> --target "<대상폴더>" --yes
 ```
 
-자연어로 새 작업 요청:
-> "새 작업 만들어줘. 목표는 ○○이고 ○○ worker가 필요할 것 같아."
+설치가 끝나면 자동으로 `validate.py`가 돌며 PASS/FAIL을 보여준다.
 
-Orchestrator가 `_templates/task-folder.md` 가이드에 따라 작업 폴더 생성 → worker 승인 요청 → 진행.
+## 설치 후
+
+생성된 폴더로 이동해 해당 도구를 실행하고 자연어로 작업을 요청한다:
+
+```
+> 새 작업 만들어줘. 목표는 ○○이고 ○○ worker가 필요할 것 같아.
+```
+
+Orchestrator가 작업 폴더를 만들고 → 워커 승인을 요청한 뒤 → 진행한다.
+운영 규칙 전문은 생성된 폴더의 `CLAUDE.md`(claude) / `AGENTS.md`(codex) 참조.
 
 ## 모니터링 (선택) — mat
 
 작업 진행을 터미널에서 지켜보고 싶다면 **[mat](https://github.com/netwaif/mat)** (MultiAgent Tracker)를 함께 쓴다.
 한 작업의 워커 상태(대기·실행 중·완료·에러)·goal·로그를 한 화면에서 본다.
-시스템을 **읽기만** 한다 — 작업 생성·승인·워커 호출은 하지 않으므로, 켜두거나 꺼도 진행에 영향이 없다.
+시스템을 **읽기만** 하므로 켜두거나 꺼도 진행에 영향이 없다.
 
 ```bash
 brew install netwaif/tap/mat
-MAT_ROOT=~/VSCodeWorkspace/MultiAgent mat
+MAT_ROOT=<생성된-폴더> mat
 ```
 
 설치·키 조작 등 자세한 내용은 [mat 저장소](https://github.com/netwaif/mat) 참고.
 
-> ⚠️ mat에서 워커 한 줄 목적이 ` ```yaml `로 보이면 **알려진 경미 이슈**(KI-1)다.
-> 시스템·진행에는 영향 없다. [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md) 참고.
+## 저장소 구조
+
+```
+multi-agent-starter/
+├── generator/
+│   ├── init.py            # 결정적 생성기 (flavor·대상·tasks 보존·dry-run·guard)
+│   ├── validate.py        # flavor별 불변식 자가점검
+│   ├── build_zip.py       # 자립형 ZIP 빌더 (재현가능)
+│   └── templates/{claude,codex}/   # 두 flavor 정본
+├── .claude-plugin/marketplace.json # Claude Code 플러그인
+├── .codex-plugin/plugin.json       # Codex 플러그인
+└── skills/configure-multiagent/    # "구성해줘" front door
+```
 
 ## 알려진 이슈
 
 해결·보류 중인 알려진 결함은 [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md)에 추적한다.
 
-## 핵심 원칙
-
-| 원칙 | 강제 방식 |
-|------|---------|
-| 모든 worker 호출 전 승인 | `task.md`의 `workers_approved` 필드 |
-| 측정 가능한 컨텍스트 한도 | `wc -m` / `wc -w`로 검증 |
-| append-only 로그 | `log.md` 수정·삭제 금지 |
-| 최소 worker set | `routing.md` decision tree로 강제 |
-| codex-main 외부 repo 쓰기 4-조건 | `target_repo` + `write_scope` + 승인 + log [APPROVAL] |
-
-자세한 규칙은 [`CLAUDE.md`](./CLAUDE.md) 참고.
-
 ## 라이선스
 
-개인 사용 및 학습 목적.
+[MIT](./LICENSE)
