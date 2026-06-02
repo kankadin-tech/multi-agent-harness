@@ -18,10 +18,10 @@
 
 ## 자가 점검 스크립트
 
-`~/VSCodeWorkspace/CodexMultiAgent`에서 실행한다.
+`<설치한-폴더>`에서 실행한다.
 
 ```bash
-ROOT=~/VSCodeWorkspace/CodexMultiAgent
+ROOT=<설치한-폴더>
 
 echo "INV1 tasks-only 분포"
 grep -l 'tasks-only' "$ROOT/AGENTS.md" "$ROOT/_shared/routing.md" \

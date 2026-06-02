@@ -23,7 +23,7 @@ tasks/<task-name>/
 
 ```bash
 TASK=my-task-name
-ROOT=~/VSCodeWorkspace/CodexMultiAgent
+ROOT=<설치한-폴더>
 mkdir -p "$ROOT/tasks/$TASK"
 cp "$ROOT/_templates/task.md" "$ROOT/tasks/$TASK/task.md"
 cp "$ROOT/_templates/log.md" "$ROOT/tasks/$TASK/log.md"

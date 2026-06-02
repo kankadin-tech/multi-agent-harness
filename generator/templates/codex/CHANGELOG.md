@@ -1,10 +1,10 @@
 # Changelog
 
-이 파일은 CodexMultiAgent orchestration 시스템의 주요 변경을 기록한다.
+이 파일은 multi-agent-starter (Codex flavor) orchestration 시스템의 주요 변경을 기록한다.
 
 ## [0.1.0] - 2026-06-01
 
-`~/VSCodeWorkspace/MultiAgent` 원본 starter를 기반으로 Codex Orchestrator 버전을 생성했다.
+multi-agent-starter를 기반으로 Codex Orchestrator 버전을 생성했다.
 
 ### Added
 
@@ -20,11 +20,9 @@
 
 - Orchestrator를 Claude Code 세션에서 Codex 세션으로 변경.
 - 리뷰 worker를 Codex 자기검수 구조에서 `claude-critic` 독립 검수 구조로 변경.
-- 경로 기준을 `~/VSCodeWorkspace/CodexMultiAgent`로 변경.
 
 ### Excluded
 
-- 원본 `~/VSCodeWorkspace/MultiAgent/.git`
 - 원본 `.claude/agents/`
 - 원본 `_local/learnings.md`
 - 원본의 기존 작업 이력 산출물

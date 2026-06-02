@@ -3,9 +3,8 @@
 해결되지 않은 알려진 결함을 추적한다. 고쳐지면 해당 항목을 닫고(✅) PR 링크를 단다.
 시스템이 깨지는 크리티컬은 즉시 수정 대상, 표시·미관 한정은 보류 가능.
 
-출처: 원본 `~/VSCodeWorkspace/MultiAgent`의 `repo-consistency-audit` (2026-05-19).
-상세 근거표는 작성자 로컬 `tasks/repo-consistency-audit/artifacts/contradictions.md`
-(`.gitignore`의 `tasks/*`라 공개본엔 미포함 — 유지보수자 전용).
+출처: multi-agent-starter의 `repo-consistency-audit` (2026-05-19).
+상세 근거표(`repo-consistency-audit`)는 공개 배포본에 미포함 — 유지보수자 전용.
 
 ---
 

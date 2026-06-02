@@ -109,4 +109,4 @@ Workers must never edit `_shared/`, `_templates/`, or another task folder unless
 
 ## AGENTS.md Scope
 
-These rules apply when Codex is working in `~/VSCodeWorkspace/CodexMultiAgent` or its subdirectories. Do not copy this orchestration policy into unrelated projects.
+These rules apply when Codex is working in `<설치한-폴더>` or its subdirectories. Do not copy this orchestration policy into unrelated projects.

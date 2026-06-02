@@ -4,8 +4,8 @@
 
 ## 0. 출처
 
-- 원본 starter: `~/VSCodeWorkspace/MultiAgent`
-- Codex fork: `~/VSCodeWorkspace/CodexMultiAgent`
+- 원본 starter: multi-agent-starter
+- Codex flavor: multi-agent-starter의 Codex orchestrator 파생본
 - 사용자 결정: Codex가 메인 오케스트레이터가 되며, Codex 산출물 비평은 자기검수인 `codex-critic`이 아니라 독립성 있는 `claude-critic`이 맡는다.
 
 ## 1. 핵심 개념 → 시스템 규칙 매핑
