@@ -98,10 +98,10 @@ wc -w tasks/<task>/context.md   # 영문 단어수
 
 ## CLAUDE.md 적용 범위
 
-이 파일은 **Claude Code를 `~/VSCodeWorkspace/MultiAgent/` 또는 그 하위에서 실행**할 때만 적용됨.
+이 파일은 **Claude Code를 `<설치한-폴더>/` 또는 그 하위에서 실행**할 때만 적용됨.
 
 ```bash
-cd ~/VSCodeWorkspace/MultiAgent && claude
+cd <설치한-폴더> && claude
 ```
 
 다른 디렉토리에서 실행 시 적용 안 됨 (의도된 격리).  

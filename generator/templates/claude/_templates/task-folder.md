@@ -25,7 +25,7 @@ tasks/<task-name>/
 
 ```bash
 TASK=my-task-name
-ROOT=~/VSCodeWorkspace/MultiAgent
+ROOT=<설치한-폴더>
 mkdir -p "$ROOT/tasks/$TASK"
 cp "$ROOT/_templates/task.md"    "$ROOT/tasks/$TASK/task.md"
 cp "$ROOT/_templates/log.md"     "$ROOT/tasks/$TASK/log.md"
@@ -99,7 +99,7 @@ wc -w "$ROOT/tasks/$TASK/workers/$ROLE/brief.md"   # 영문 단어수 ≤ 240
 - **codex-main / codex-critic**: `mcp__codex__codex` MCP 도구 호출
   - `prompt`: brief.md 내용 그대로
   - `cwd`:
-    - codex-main 기본: `~/VSCodeWorkspace/MultiAgent/tasks/<task>/` (작업 폴더 안에서 산출물 작성)
+    - codex-main 기본: `<설치한-폴더>/tasks/<task>/` (작업 폴더 안에서 산출물 작성)
     - codex-main 외부 쓰기 4조건 충족 시: brief.md의 `target_repo` 값
     - codex-critic: brief.md의 `target_repo` 값 (비평 대상 repo 컨텍스트)
   - `sandbox`:

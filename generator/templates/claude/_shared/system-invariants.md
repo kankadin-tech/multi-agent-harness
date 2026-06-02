@@ -22,11 +22,11 @@
 
 ## 자가 점검 스크립트
 
-`~/VSCodeWorkspace/MultiAgent`에서 실행. MANUAL은 외부 매뉴얼 경로.
+`<설치한-폴더>`에서 실행. MANUAL은 외부 매뉴얼 경로.
 
 ```bash
-ROOT=~/VSCodeWorkspace/MultiAgent
-MANUAL=~/VSCodeWorkspace/multi-agent-manual/multi-agent-manual.txt
+ROOT=<설치한-폴더>
+MANUAL=<매뉴얼-경로>/multi-agent-manual.txt
 
 echo "INV1 tasks-only 분포 (CLAUDE/routing/templates/매뉴얼 모두 존재해야)"
 grep -l 'tasks-only' "$ROOT/CLAUDE.md" "$ROOT/_shared/routing.md" \
@@ -43,7 +43,7 @@ grep -rn '1500자\|1200자' "$ROOT/CLAUDE.md" "$MANUAL" "$ROOT/_templates/contex
 
 echo "INV5 매뉴얼 섹션 수 vs manual-repo CLAUDE.md 목록 수 (두 숫자 같아야; design-basis 현재값=10)"
 grep -nE '^[0-9]{1,2}\. ' "$MANUAL" | grep -viE 'brief에|task.md의|log.md에'   # 4조건 번호목록 제외 → 메인 섹션만
-grep -cE '^[0-9]{1,2}\. ' ~/VSCodeWorkspace/multi-agent-manual/CLAUDE.md
+grep -cE '^[0-9]{1,2}\. ' <매뉴얼-경로>/CLAUDE.md
 
 echo "INV6 workers_approved HH:MM 잔존 (출력 없어야 PASS)"
 grep -n 'approved_at: <YYYY-MM-DD HH:MM>' "$MANUAL"

@@ -17,9 +17,9 @@ MultiAgent Orchestrator는 인터랙티브 Claude Code 세션에서만 실행한
 
 ## 2. 시스템 수정·검증 프로토콜
 
-**적용 조건 (게이트)**: 이번 작업이 시스템 파일 — `CLAUDE.md`·`_shared/*`·`_templates/*`·외부 매뉴얼(`~/VSCodeWorkspace/multi-agent-manual/`) — 을 **수정하거나 검증**하는 작업일 때만 이 절을 적용한다. 일반 작업에서는 아래 파일들을 읽지 않는다 (progressive disclosure — 상시 로드 금지).
+**적용 조건 (게이트)**: 이번 작업이 시스템 파일 — `CLAUDE.md`·`_shared/*`·`_templates/*`·외부 매뉴얼(`<매뉴얼-경로>/`) — 을 **수정하거나 검증**하는 작업일 때만 이 절을 적용한다. 일반 작업에서는 아래 파일들을 읽지 않는다 (progressive disclosure — 상시 로드 금지).
 
-**작업 위치**: 시스템 수정·검증은 `~/VSCodeWorkspace/MultiAgent/`에서 Claude Code로만 수행한다. 다른 디렉토리·다른 도구의 편집은 CLAUDE.md가 적용 안 되고 아래 점검을 건너뛰므로 금지(비권장). 외부 편집을 발견하면 사용자에게 알리고 점검부터 돌린다.
+**작업 위치**: 시스템 수정·검증은 `<설치한-폴더>/`에서 Claude Code로만 수행한다. 다른 디렉토리·다른 도구의 편집은 CLAUDE.md가 적용 안 되고 아래 점검을 건너뛰므로 금지(비권장). 외부 편집을 발견하면 사용자에게 알리고 점검부터 돌린다.
 
 **절차**:
 1. `_shared/design-basis.md` 를 읽는다 — 개념↔규칙 매핑·권위 우선순위·기존 결정(D*). GitHub 레퍼런스부터 재분석하지 말 것. design-basis로 충분.

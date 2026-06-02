@@ -40,4 +40,4 @@ tools: '*'
 
 ## 참고
 
-상세 운영 규칙은 `~/VSCodeWorkspace/MultiAgent/CLAUDE.md` 와 `_shared/routing.md` 참조.
+상세 운영 규칙은 `<설치한-폴더>/CLAUDE.md` 와 `_shared/routing.md` 참조.
