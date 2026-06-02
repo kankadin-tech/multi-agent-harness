@@ -80,10 +80,10 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
     miss_topo = [t for t in TOPOLOGY if t not in routing]
     check(not miss_topo, f"C5 토폴로지 4패턴 (없음: {miss_topo or '-'})")
 
-    # C6 gemini 기본 pro-low, pro-high 격상 아님
-    pro_low = "gemini-3.1-pro-low" in routing
-    bad_default = bool(re.search(r"pro-high[^\n]*기본|기본[^\n]*pro-high", routing)) and "제외" not in routing
-    check(pro_low and not bad_default, "C6 gemini pro-low 기본 (pro-high 미격상)")
+    # C6 gemini 백엔드 정책: backends.json gemini = agy cli + pro-high (옛 mcp 프록시 브리지 폐기)
+    bj = read(target, "_shared/backends.json") or ""
+    c6_ok = ('"command": "agy"' in bj) and ("gemini-3.1-pro-high" in bj)
+    check(c6_ok, "C6 gemini 백엔드 agy/pro-high (backends.json)")
 
     # C7 write_scope 값 일관 (tasks-only 가 지침/routing/brief에 존재)
     ws = all("tasks-only" in t for t in (instr_txt, routing, brief_tpl))

@@ -14,7 +14,7 @@
 | INV6 | 권위 우선순위가 `AGENTS.md` 기준으로 기록됨 |
 | INV7 | 재진입 프로토콜이 `orchestrator-rules.md`와 `AGENTS.md` 포인터에 모두 존재 |
 | INV8 | 토폴로지 4패턴(Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer)이 routing에 존재 |
-| INV9 | Gemini 기본 모델은 `gemini-3.1-pro-low`, `pro-high`는 기본·폴백 경로가 아님 |
+| INV9 | gemini 백엔드가 `_shared/backends.json`에서 `agy` CLI(command agy)이고 기본 모델 `gemini-3.1-pro-high`; routing.md·D4가 backends를 정본 참조, 옛 `mcp__gemini-pro__*` 활성호출 없음 |
 
 ## 자가 점검 스크립트
 
@@ -53,9 +53,11 @@ for p in 'Pipeline' 'Fan-out/Fan-in' 'Expert Pool' 'Producer-Reviewer'; do
   grep -q "$p" "$ROOT/_shared/routing.md" && echo " $p PASS" || echo " $p FAIL"
 done
 
-echo "INV9 gemini 모델"
-grep -n 'gemini-3.1-pro-low' "$ROOT/_shared/routing.md" "$ROOT/_shared/design-basis.md"
-grep -n 'pro-high' "$ROOT/_shared/routing.md" "$ROOT/_shared/design-basis.md"
+echo "INV9 gemini 백엔드 (backends.json agy·pro-high 둘 다 출력돼야 PASS)"
+grep -n '"command": "agy"' "$ROOT/_shared/backends.json"
+grep -n 'gemini-3.1-pro-high' "$ROOT/_shared/backends.json"
+echo "INV10 옛 프록시 활성호출 (출력 없어야 PASS; 폐기문맥 제외)"
+grep -rn 'mcp__gemini-pro__\|mcp__gemini__gemini_' "$ROOT/_shared/routing.md" "$ROOT/_templates/task-folder.md" "$ROOT/AGENTS.md" | grep -viE '폐기|deprecat' || true
 ```
 
 ## 전면 재감사가 필요한 경우
