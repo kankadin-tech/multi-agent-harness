@@ -59,6 +59,23 @@ python3 generator/init.py --flavor <claude|codex> --target "<대상폴더>" --ye
 Orchestrator가 작업 폴더를 만들고 → 워커 승인을 요청한 뒤 → 진행한다.
 운영 규칙 전문은 생성된 폴더의 `CLAUDE.md`(claude) / `AGENTS.md`(codex) 참조.
 
+## v1 → v2 마이그레이션 (기존 clone 사용자)
+
+v1은 이 repo를 clone해 루트 파일을 그대로 썼다. v2에서는 **같은 폴더에 생성기를 다시 돌려**
+시스템 파일만 최신화하면 된다 — 작업 데이터는 보존된다.
+
+1. 플러그인 설치(위 "설치 & 사용") 또는 ZIP 다운로드
+2. 기존 폴더를 대상으로 생성기 실행:
+   ```bash
+   python3 <plugin-or-zip>/generator/init.py --flavor claude --target "<기존-폴더>" --yes
+   ```
+3. **update 모드**로 동작 — `tasks/`·`_local/` 사용자 데이터는 보존하고
+   시스템 파일(`CLAUDE.md`, `_shared/*`, `_templates/*` 등)만 덮어쓴다.
+4. 끝에 `validate.py`가 자동 실행 — PASS 확인 후 사용
+
+> ⚠️ 시스템 파일을 직접 커스터마이즈했다면 덮이기 전에 백업/커밋해 둔다.
+> 생성기는 번들 템플릿으로 덮어쓰며 로컬 수정은 유지하지 않는다.
+
 ## 모니터링 (선택) — mat
 
 작업 진행을 터미널에서 지켜보고 싶다면 **[mat](https://github.com/netwaif/mat)** (MultiAgent Tracker)를 함께 쓴다.

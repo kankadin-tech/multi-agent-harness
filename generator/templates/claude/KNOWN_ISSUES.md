@@ -4,8 +4,7 @@
 시스템이 깨지는 크리티컬은 즉시 수정 대상, 표시·미관 한정은 보류 가능.
 
 출처: `repo-consistency-audit` (2026-05-19, claude-main·codex-main 병렬 + Orchestrator 교차검증).
-상세 근거표는 작성자 로컬 `tasks/repo-consistency-audit/artifacts/contradictions.md`
-(`.gitignore`의 `tasks/*`라 공개본엔 미포함 — 유지보수자 전용).
+상세 근거표(`repo-consistency-audit`)는 공개 배포본에 미포함 — 유지보수자 전용.
 
 ---
 

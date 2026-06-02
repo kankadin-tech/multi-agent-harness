@@ -1,4 +1,4 @@
-# CodexMultiAgent — Codex · Claude · Gemini Orchestration Starter
+# MultiAgent — Codex · Claude · Gemini Orchestration Starter
 
 Codex를 오케스트레이터로 두고 Codex·Claude·Gemini를 필요할 때 워커로 호출하는 **파일 기반 멀티에이전트 시스템**.
 

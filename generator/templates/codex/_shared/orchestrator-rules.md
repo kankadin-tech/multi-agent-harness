@@ -1,12 +1,12 @@
 # Orchestrator Rules
 
-Codex 세션이 CodexMultiAgent Orchestrator로 동작할 때 지켜야 할 규칙이다. 각 항목은 세션 시작 또는 작업 재진입 시 자체 점검 대상이다.
+Codex 세션이 MultiAgent Orchestrator로 동작할 때 지켜야 할 규칙이다. 각 항목은 세션 시작 또는 작업 재진입 시 자체 점검 대상이다.
 
 ---
 
 ## 1. Orchestrator 실행 환경
 
-CodexMultiAgent Orchestrator는 `<설치한-폴더>` 또는 그 하위에서 실행되는 Codex 세션이다.
+MultiAgent Orchestrator는 `<설치한-폴더>` 또는 그 하위에서 실행되는 Codex 세션이다.
 
 세션 시작 시 자체 점검:
 
