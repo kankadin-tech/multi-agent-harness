@@ -6,7 +6,6 @@ Antigravity(Gemini 3.1 Pro High)를 오케스트레이터로 두고 Claude·Code
 
 - **Orchestrator = Antigravity 세션** (이 폴더 안에서 실행 시 `AGENTS.md` 적용)
 - **Workers** = 별도 worker/model 호출. 모두 승인 게이트 통과 필요.
-  - `codex-main` — 구현·코드 분석·테스트·로컬 검증·이미지 생성
   - `claude-main` — 메인 코딩·설계
   - `codex-main` — 보조 구현·분석·테스트
   - `codex-critic` — 산출물 리뷰·비평(교차 벤더)
@@ -16,7 +15,7 @@ Antigravity(Gemini 3.1 Pro High)를 오케스트레이터로 두고 Claude·Code
 
 ```
 <설치한-폴더>/
-├── AGENTS.md              # Codex용 운영 규칙 전문
+├── AGENTS.md              # Antigravity용 운영 규칙 전문
 ├── _shared/
 │   ├── routing.md             # worker 선택 decision tree + 호출 방식
 │   ├── approval-policy.md     # 승인 게이트 정책
@@ -47,10 +46,14 @@ Antigravity(Gemini 3.1 Pro High)를 오케스트레이터로 두고 Claude·Code
 
 ## 사용 시작
 
+이 폴더를 **Antigravity IDE에서 열거나**, 폴더 안에서 Antigravity CLI를 실행한다(오케스트레이터 = Gemini 3.1 Pro High):
+
 ```bash
 cd <설치한-폴더>
-codex
+agy            # 또는 Antigravity IDE에서 이 폴더 열기
 ```
+
+Antigravity가 `AGENTS.md`를 자동 로드해 규칙을 따른다. 워커(claude-main/codex-main/codex-critic)는 `_shared/adapters/call_worker.sh`로 호출된다.
 
 자연어로 새 작업 요청:
 

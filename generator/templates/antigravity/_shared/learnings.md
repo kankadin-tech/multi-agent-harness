@@ -20,7 +20,7 @@
 
 <!-- 이 아래부터 교훈 추가 -->
 
-## [2026-06-01] [codex-fork]
-**교훈**: Codex가 Orchestrator인 fork에서는 산출물 리뷰 worker를 Gemini(오케스트레이터) 자기검수로 두지 말고 `codex-critic`으로 분리해야 독립 검토의 의미가 유지된다.
-**근거**: 사용자 결정에 따라 원본 MultiAgent의 critic 역할을 Codex 버전에 맞게 재설계했다.
+## [2026-06-01] [antigravity-flavor]
+**교훈**: Antigravity(Gemini)가 Orchestrator인 flavor에서는 산출물 리뷰 worker를 Gemini(오케스트레이터) 자기검수로 두지 말고 `codex-critic`으로 분리해야 독립 검토의 의미가 유지된다.
+**근거**: 사용자 결정에 따라 원본 MultiAgent의 critic 역할을 Antigravity 버전에 맞게 재설계했다.
 **worker**: orchestrator

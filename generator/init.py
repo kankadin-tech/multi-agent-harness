@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """MultiAgent 시스템 생성기 — 결정적(deterministic) 스캐폴더.
 
-flavor 템플릿(claude | codex)을 대상 폴더에 복사한다.
+flavor 템플릿(claude | codex | antigravity)을 대상 폴더에 복사한다.
 - 결정적: 번들된 템플릿 파일을 그대로 복사. LLM 자유작문 없음 → 불변식 보장.
 - 안전: 기존 tasks/·_local/ 사용자 데이터를 절대 지우지 않음(update 모드 보존).
 - 호스트 독립: 순수 파이썬. plugin/skill/ZIP은 이 스크립트를 부르는 얇은 front door일 뿐.

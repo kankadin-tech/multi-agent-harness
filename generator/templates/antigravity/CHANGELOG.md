@@ -9,7 +9,7 @@ multi-agent-starter를 기반으로 Antigravity Orchestrator 버전을 생성했
 ### Added
 
 - `AGENTS.md`: Antigravity 세션용 운영 규칙 정본.
-- `_shared/routing.md`: `codex-main`, `codex-critic`, `gemini` 기준 worker routing.
+- `_shared/routing.md`: `claude-main`, `codex-main`, `codex-critic` 기준 worker routing.
 - `_shared/approval-policy.md`: worker 승인과 외부/유료 모델 승인 게이트.
 - `_shared/orchestrator-rules.md`: Antigravity 세션 환경 점검, 시스템 수정·검증, 작업 재진입 프로토콜.
 - `_shared/design-basis.md`: Antigravity flavor의 결정 기록.

@@ -96,16 +96,16 @@ Default checks:
 - `tasks-only` — write only inside `tasks/<task>/`
 - `"src/**, tests/**"` style patterns — external repo paths allowed only when all 4 conditions below are met
 
-### codex-main External Repo Write Conditions
+### Worker External Repo Write Conditions (claude-main / codex-main)
 
 All 4 are required:
 
 1. `brief.md` includes `target_repo: <absolute path>`.
 2. `brief.md` includes `write_scope: <allowed path pattern>`.
-3. `task.md` `workers_approved` includes `codex-main` and the approved `write_scope`.
+3. `task.md` `workers_approved` includes the worker and the approved `write_scope`.
 4. `log.md` has a separate `[APPROVAL]` entry for external write approval.
 
-If any condition is missing, `codex-main` writes only inside `tasks/<task>/`, preferably as a diff or patch for user/orchestrator application.
+If any condition is missing, the worker writes only inside `tasks/<task>/`, preferably as a diff or patch for user/orchestrator application.
 
 Workers must never edit `_shared/`, `_templates/`, or another task folder unless the current task is explicitly a system maintenance task.
 

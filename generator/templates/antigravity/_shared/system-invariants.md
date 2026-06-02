@@ -7,14 +7,15 @@
 | ID | 불변식 |
 |----|--------|
 | INV1 | `write_scope` 값 집합이 `AGENTS.md`, `routing.md`, `worker-brief.md`, `task-folder.md`에서 동일 |
-| INV2 | `codex-critic`이 실행 규칙·템플릿의 활성 worker로 남아 있지 않음 |
-| INV3 | `codex-critic` 선행조건이 특정 worker 결과에만 묶이지 않고 일반화되어 있음 |
+| INV2 | 오케스트레이터가 Gemini(agy)이므로 **별도 `gemini` 워커·`gemini-critic` 자기검수 워커가 활성으로 없음** (멀티모달은 오케스트레이터가 직접) |
+| INV3 | 비평 워커 `codex-critic`이 교차벤더(Codex)로 존재 — 선행조건이 특정 worker 결과에만 묶이지 않고 일반화 |
 | INV4 | log 태그가 정확히 `DECISION | WORKER_CALL | VERIFICATION | ERROR | APPROVAL | COMPLETE` 6종 |
 | INV5 | context 한도 1500자, brief 한도 1200자가 정본 문서와 템플릿에서 일치 |
 | INV6 | 권위 우선순위가 `AGENTS.md` 기준으로 기록됨 |
 | INV7 | 재진입 프로토콜이 `orchestrator-rules.md`와 `AGENTS.md` 포인터에 모두 존재 |
 | INV8 | 토폴로지 4패턴(Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer)이 routing에 존재 |
-| INV9 | gemini 백엔드가 `_shared/backends.json`에서 `agy` CLI(command agy)이고 기본 모델 `gemini-3.1-pro-high`; routing.md·D4가 backends를 정본 참조, 옛 `mcp__gemini-pro__*` 활성호출 없음 |
+| INV9 | 오케스트레이터가 agy/Gemini 3.1 Pro High (`AGENTS.md` 명시), `backends.json` workers = `claude-main`·`codex-main`·`codex-critic` (gemini 워커 없음) |
+| INV10 | `gemini` 워커 호출(`call_worker.sh gemini`)·옛 `mcp__gemini-pro__*` 브리지가 활성 지침으로 없음 |
 
 ## 자가 점검 스크립트
 
@@ -27,12 +28,12 @@ echo "INV1 tasks-only 분포"
 grep -l 'tasks-only' "$ROOT/AGENTS.md" "$ROOT/_shared/routing.md" \
   "$ROOT/_templates/worker-brief.md" "$ROOT/_templates/task-folder.md"
 
-echo "INV2 codex-critic 활성 참조 (출력 없어야 PASS)"
-grep -rn 'codex-critic' "$ROOT/AGENTS.md" "$ROOT/README.md" \
-  "$ROOT/_shared/routing.md" "$ROOT/_shared/approval-policy.md" \
-  "$ROOT/_shared/orchestrator-rules.md" "$ROOT/_templates"
+echo "INV2 gemini 워커/gemini-critic 활성 참조 (출력 없어야 PASS)"
+grep -rn 'call_worker.sh gemini\|gemini-critic\|- \*\*gemini\*\*' \
+  "$ROOT/AGENTS.md" "$ROOT/README.md" "$ROOT/_shared/routing.md" \
+  "$ROOT/_shared/approval-policy.md" "$ROOT/_templates" || echo " 없음 PASS"
 
-echo "INV3 codex-critic 존재"
+echo "INV3 codex-critic 비평 워커 존재"
 grep -rn 'codex-critic' "$ROOT/AGENTS.md" "$ROOT/_shared/routing.md" "$ROOT/_templates"
 
 echo "INV4 log 태그"
@@ -53,11 +54,16 @@ for p in 'Pipeline' 'Fan-out/Fan-in' 'Expert Pool' 'Producer-Reviewer'; do
   grep -q "$p" "$ROOT/_shared/routing.md" && echo " $p PASS" || echo " $p FAIL"
 done
 
-echo "INV9 gemini 백엔드 (backends.json agy·pro-high 둘 다 출력돼야 PASS)"
-grep -n '"command": "agy"' "$ROOT/_shared/backends.json"
-grep -n 'gemini-3.1-pro-high' "$ROOT/_shared/backends.json"
-echo "INV10 옛 프록시 활성호출 (출력 없어야 PASS; 폐기문맥 제외)"
-grep -rn 'mcp__gemini-pro__\|mcp__gemini__gemini_' "$ROOT/_shared/routing.md" "$ROOT/_templates/task-folder.md" "$ROOT/AGENTS.md" | grep -viE '폐기|deprecat' || true
+echo "INV9 오케스트레이터·워커셋 (Gemini 3.1 Pro High + claude-main/codex-main/codex-critic)"
+grep -q 'Gemini 3.1 Pro High' "$ROOT/AGENTS.md" && echo " orchestrator PASS" || echo " orchestrator FAIL"
+for w in claude-main codex-main codex-critic; do
+  grep -q "\"$w\"" "$ROOT/_shared/backends.json" && echo " $w PASS" || echo " $w FAIL"
+done
+
+echo "INV10 gemini 워커 호출/옛 프록시 활성 (출력 없어야 PASS; 폐기문맥 제외)"
+grep -rn 'call_worker.sh gemini\|mcp__gemini-pro__\|mcp__gemini__gemini_' \
+  "$ROOT/_shared/routing.md" "$ROOT/_templates/task-folder.md" "$ROOT/AGENTS.md" "$ROOT/_shared/backends.json" \
+  | grep -viE '폐기|deprecat' || echo " 없음 PASS"
 ```
 
 ## 전면 재감사가 필요한 경우

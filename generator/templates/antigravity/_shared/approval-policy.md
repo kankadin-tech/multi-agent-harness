@@ -5,7 +5,7 @@
 **모든 worker 호출은 작업별로 명시적 승인 필요** (`claude-main`, `codex-main`, `codex-critic` 전체 pool 적용).
 `task.md`의 `workers_approved` 리스트에 없으면 호출 금지.
 
-**예외**: Antigravity Orchestrator의 내부 추론은 worker 호출이 아니므로 승인 불필요. 다만 별도 `codex-main`, `codex-critic`, `gemini` worker 호출은 승인 대상이다.
+**예외**: Antigravity Orchestrator의 내부 추론은 worker 호출이 아니므로 승인 불필요. 다만 별도 `claude-main`, `codex-main`, `codex-critic` worker 호출은 승인 대상이다.
 
 외부/유료 모델(`claude`, `gemini`, `openai`, `llm`, MCP/agent bridge 등)은 worker 승인과 별도로, 실제 호출 직전에 도구·모델·비용 가능성을 밝히고 사용자 승인을 받아야 한다.
 
@@ -33,9 +33,8 @@
 | Worker | 예상 비용 | 쿼터 부담 |
 |--------|-----------|-----------|
 | codex-main | 중간 | Codex 호출 쿼터 |
-| codex-critic | 중간 | Claude API/구독 쿼터 |
-| gemini flash | 낮음 | Gemini 쿼터 |
-| gemini pro | 중간-높음 | Gemini 쿼터 |
+| codex-critic | 중간 | Codex 호출 쿼터 |
+| claude-main | 중간-높음 | Claude API/구독 쿼터 |
 
 ## 승인 기록 형식
 

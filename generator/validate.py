@@ -95,6 +95,17 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
         c6_ok, c6_why = _gemini_policy_ok(read(target, "_shared/backends.json"))
     check(c6_ok, f"C6 gemini 정책 {('— ' + c6_why) if not c6_ok else '(OK)'}")
 
+    # C6b antigravity 전용: 워커셋이 {claude-main,codex-main,codex-critic}이고 gemini 워커 호출 잔재 없음
+    if flavor == "antigravity":
+        try:
+            ws = set((json.loads(read(target, "_shared/backends.json") or "{}").get("workers") or {}).keys())
+        except Exception:  # noqa: BLE001
+            ws = set()
+        tf = read(target, "_templates/task-folder.md") or ""
+        no_gem = all("call_worker.sh gemini" not in t for t in (routing, tf, instr_txt))
+        set_ok = (ws <= {"claude-main", "codex-main", "codex-critic"}) and ("claude-main" in ws)
+        check(no_gem and set_ok, f"C6b 워커셋 {sorted(ws)} + gemini 워커 호출 잔재 없음")
+
     # C7 write_scope 값 일관 (tasks-only 가 지침/routing/brief에 존재)
     ws = all("tasks-only" in t for t in (instr_txt, routing, brief_tpl))
     check(ws, "C7 write_scope tasks-only 분포 (지침/routing/brief)")

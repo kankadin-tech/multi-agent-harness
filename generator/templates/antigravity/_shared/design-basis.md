@@ -5,8 +5,8 @@
 ## 0. 출처
 
 - 원본 starter: multi-agent-starter
-- Antigravity flavor: multi-agent-starter의 Codex orchestrator 파생본
-- 사용자 결정: Codex가 메인 오케스트레이터가 되며, Antigravity 산출물 비평은 자기검수인 `codex-critic`이 아니라 독립성 있는 `codex-critic`이 맡는다.
+- Antigravity flavor: multi-agent-starter의 Antigravity(Gemini) orchestrator 파생본
+- 사용자 결정: Antigravity(agy/IDE, Gemini 3.1 Pro High)가 메인 오케스트레이터가 되며, 산출물 비평은 자기벤더(gemini) 자기검수가 아니라 교차벤더 독립성 있는 `codex-critic`이 맡는다. 메인 코딩은 `claude-main`.
 
 ## 1. 핵심 개념 → 시스템 규칙 매핑
 
@@ -16,7 +16,7 @@
 | Progressive disclosure | sources/ 경로 참조, brief 최소화 | 긴 자료 inline 금지 |
 | Filesystem = memory | task/context/log/brief/result | 런타임 상태에 의존하지 않음 |
 | Append-only + provenance | log.md append-only, 태그 6종 | 로그 삭제·수정 금지 |
-| Never trust upstream | worker result 검증 후 채택 | critic/gemini 출력도 사실검증 |
+| Never trust upstream | worker result 검증 후 채택 | 모든 worker(claude-main/codex-main/codex-critic) 출력 사실검증 |
 | Adversarial review | `codex-critic` | Gemini(오케스트레이터) 자기검수로 대체 금지 |
 | 최소 worker set | routing.md decision tree | 모든 worker 기본 호출 금지 |
 | Fan-in 충돌 해소 | 출처 병기, 사실검증, `[DECISION]` | 다수결 금지 |
@@ -30,11 +30,11 @@
 ## 3. 결정 기록
 
 - **D1 write_scope 값 집합** = `none | tasks-only | "패턴"`. `tasks-only`는 `tasks/<task>/` 내부만 쓰는 기본값이다.
-- **D2 critic 역할** = Codex 버전에서 산출물 리뷰 worker는 `codex-critic`이다. Codex가 자기 산출물을 다시 검수하는 `codex-critic` 구조는 사용하지 않는다.
-- **D3 codex-critic 선행조건** = 리뷰 대상 산출물 경로가 존재해야 한다. 대상은 `codex-main result.md`로 한정하지 않고, Orchestrator 산출물·기존 코드·문서·소스도 가능하다.
-- **D4 gemini 정책** = 백엔드 Antigravity `agy` CLI(`_shared/backends.json` 정본, 디스패처 `call_worker.sh`). 기본 `gemini-3.1-pro-high`, 빠른 경로 `gemini-3-flash`/`pro-low`, 폴백 `api`. 옛 `mcp__gemini-pro__*` 프록시 브리지 폐기. `pro-high` 제외 사유(옛 프록시 400)는 agy엔 비해당(2026-06-02 실증). agy 모델은 전역·계정단위라 gemini 전용 전역을 pro-high로 운용.
-- **D5 Orchestrator** = Antigravity 현재 세션이 단일 Orchestrator다. 별도 long-lived supervisor worker나 worker 재귀 위임 계층은 쓰지 않는다.
-- **D6 모델 식별자 표기** = Codex와 Claude는 환경 설정/별칭을 따르고 repo에 버전 문자열을 핀하지 않는다. Gemini는 백엔드 `agy` CLI·기본 `gemini-3.1-pro-high`를 `backends.json`에 명시 핀(agy 모델이 전역·계정단위라 per-call 핀 불가). 세부는 D4.
+- **D2 critic 역할** = Antigravity 버전에서 산출물 리뷰 worker는 `codex-critic`(교차벤더)다. 오케스트레이터가 Gemini라 gemini 자기검수(gemini-critic)는 독립성이 없어 사용하지 않는다.
+- **D3 codex-critic 선행조건** = 리뷰 대상 산출물 경로가 존재해야 한다. 대상은 `claude-main`/`codex-main result.md`, Orchestrator 산출물, 기존 코드·문서·소스도 가능하다.
+- **D4 gemini 정책** = gemini는 **워커가 아니라 오케스트레이터**(Antigravity agy/IDE, 전역 모델 `gemini-3.1-pro-high`). 멀티모달·긴 문서는 오케스트레이터가 직접 처리하고 **별도 gemini 워커는 두지 않는다**(같은 벤더라 독립성 이득 없음). agy 모델은 전역·계정단위(`/model`)라 gemini 전용 전역을 pro-high로 운용.
+- **D5 Orchestrator** = Antigravity(agy/IDE, Gemini 3.1 Pro High) 현재 세션이 단일 Orchestrator다. 별도 long-lived supervisor worker나 worker 재귀 위임 계층은 쓰지 않는다.
+- **D6 모델 식별자 표기** = 워커(claude-main/codex-main/codex-critic)는 환경 설정/별칭을 따르고 repo에 버전 문자열을 핀하지 않는다. 오케스트레이터 Gemini는 agy 전역 모델 = `gemini-3.1-pro-high`(전역·계정단위라 per-call 핀 불가).
 
 ## 4. 불변식
 
