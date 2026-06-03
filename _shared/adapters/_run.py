@@ -22,12 +22,14 @@ def main() -> int:
     try:
         return proc.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
+        # 타임아웃은 우리가 종료시킨 것이므로 자식의 신호-사망 코드(-15 등)가 아니라
+        # 항상 124를 반환한다(coreutils timeout 의미와 일치, docstring 보장).
         _kill_group(proc.pid, signal.SIGTERM)
         try:
-            return proc.wait(timeout=5) or 124
+            proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             _kill_group(proc.pid, signal.SIGKILL)
-            return 124
+        return 124
 
 
 def _kill_group(pid: int, sig: int) -> None:
