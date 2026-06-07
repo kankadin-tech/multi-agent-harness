@@ -52,13 +52,13 @@
 > 모델 정책: `agy`는 모델이 전역/계정 단위(`/model`). 검증 전 **pro-high로 설정** 확인.
 
 ### A1. 설치 (세 경로 중 택1) + 즉시 검증
-- [ ] **generator**: `python3 generator/init.py --flavor <X> --target <DIR> --yes` → 설치 후 validate 자동 실행
+- [ ] **generator**: `python3 plugins/multi-agent-starter/skills/configure-multiagent/generator/init.py --flavor <X> --target <DIR> --yes` → 설치 후 validate 자동 실행
 - [ ] **plugin**: 호스트 마켓플레이스 add → "멀티에이전트 구성해줘" → init.py 실행
 - [ ] **zip**: 압축 해제 → `run.command`(mac)/`run.bat`(win)
 - 통과: 필수 파일 존재 + 아래 A2 validate 통과
 
 ### A2. 구조 검증 (L1, 자동)
-- [ ] `python3 generator/validate.py --flavor <X> --target <DIR>` → 0 FAIL ("전부 PASS")
+- [ ] `python3 plugins/multi-agent-starter/skills/configure-multiagent/generator/validate.py --flavor <X> --target <DIR>` → 0 FAIL ("전부 PASS")
 - [ ] (유지보수자) `bash tests/run.sh` 전체 PASS
 - [ ] (유지보수자) `build_zip` 3-flavor 자가검증 PASS / `sync_claude_template.py` drift 0
 

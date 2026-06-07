@@ -10,6 +10,23 @@
 **Breaking**: 배포 방식을 "clone → 루트 파일 그대로 사용"에서 **생성기 + 플러그인**으로
 전환. 이제 repo는 시스템 그 자체가 아니라 시스템을 만들어 주는 도구다.
 
+### Changed
+- **지침파일 Task Lifecycle에 워커 산출물 경로 명시 (claude/CLAUDE.md, codex·antigravity/AGENTS.md).**
+  기존엔 "brief.md/result.md 작성"이라고만 해 경로가 모호 → 오케스트레이터(특히 Gemini)가
+  `tasks/<task>/workers/<role>/` 대신 `<role>_brief.md`처럼 평탄화해서 모니터 도구(mat)가
+  워커를 못 읽는 문제. 5·6단계를 `tasks/<task>/workers/<role>/{brief,result}.md`로 못박고,
+  8단계에 완료 시 `task.md status → done` 갱신을 추가. (제미나이 자가진단으로 원인 확인.)
+- **플러그인 레이아웃: 루트 → `plugins/multi-agent-starter/` 하위 폴더로 이동.**
+  루트는 마켓 카탈로그(`.claude-plugin/marketplace.json` + 신규 `.agents/plugins/marketplace.json`)만
+  둔다. Codex가 로컬 마켓에서 플러그인 source가 repo 루트(`"./"`)인 걸 거부하기 때문
+  ([openai/codex#17066](https://github.com/openai/codex/issues/17066) — Claude는 허용, Codex는 거부).
+  이 구조로 Claude·Codex 양쪽에서 마켓 등록·설치가 동작함을 검증(`codex plugin add` → installed/enabled).
+- **generator를 `skills/configure-multiagent/generator/` 안으로 이동(스킬 자기완결).**
+  Antigravity(`agy`)는 플러그인 설치 시 인식하는 컴포넌트(skills/agents/…)만 복사하고 임의 폴더
+  (`generator/`)는 버린다 → 설치돼도 스킬이 부를 생성기가 없어 동작 불가였음. 스킬 폴더 안에 두면
+  스킬과 함께 복사된다. **3호스트 검증 완료**: `agy plugin install <경로>` / `codex plugin add` 모두
+  설치 위치에 skill+generator 동거 확인, `tests/run.sh`·`build_zip` 3-flavor 자가검증 PASS.
+
 ### Added
 - `generator/init.py` — flavor·대상 지정 결정적 생성기 (tasks/·_local/ 보존, dry-run, `--yes`, guard).
 - `generator/validate.py` — flavor별 불변식 자가점검 (claude 10 / codex 11 / antigravity 12), `init`이 설치 후 자동 호출.

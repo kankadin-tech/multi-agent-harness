@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-GEN = REPO / "generator"
+GEN = REPO / "plugins" / "multi-agent-starter" / "skills" / "configure-multiagent" / "generator"
 FLAVOR = "claude"  # update 동작은 flavor 무관 — 대표로 claude
 
 

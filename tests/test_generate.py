@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-GEN = REPO / "generator"
+GEN = REPO / "plugins" / "multi-agent-starter" / "skills" / "configure-multiagent" / "generator"
 FLAVORS = sorted(p.name for p in (GEN / "templates").iterdir() if p.is_dir())
 
 

@@ -34,10 +34,10 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).resolve().parent          # generator/
-REPO_ROOT = SCRIPT_DIR.parent
+SCRIPT_DIR = Path(__file__).resolve().parent          # skills/configure-multiagent/generator/
+REPO_ROOT = SCRIPT_DIR.parents[2]                      # plugin root (plugins/multi-agent-starter/)
 TEMPLATES_DIR = SCRIPT_DIR / "templates"
-MARKETPLACE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
+PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
 
 # 재현 가능한 zip: 모든 엔트리 mtime을 이 값으로 고정 (zip 최소 연도 1980).
 FIXED_DATE = (1980, 1, 1, 0, 0, 0)
@@ -104,8 +104,8 @@ pause >nul
 
 
 def read_version() -> str:
-    data = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
-    return data["plugins"][0]["version"]
+    data = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
+    return data["version"]
 
 
 def collect_payload() -> list[tuple[str, bytes, bool]]:
