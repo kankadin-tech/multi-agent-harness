@@ -2,6 +2,17 @@
 
 이 파일은 multi-agent-starter (Antigravity flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.2.0] - 2026-06-10
+
+카파시(Karpathy) 4원칙을 층별로 도입. 기존 규칙과 충돌 없음(보강).
+
+### Added
+- **AGENTS.md "Operating Principles" 섹션** — 4원칙 verbatim 차용 + 층별 적용 규칙(Orchestrator 전용 풀버전).
+- **`_templates/worker-brief.md` "Worker 행동 규약" 고정 블록** — 워커층 번역형: ②③ 그대로, ①은 가정 명시·표면화(워커는 one-shot이라 사용자 질문 채널 없음), ④는 오케스트레이터 전용.
+- **`_templates/worker-result.md` 체크리스트 항목** — "가정·불일치가 Issues/Caveats에 표면화됨".
+- **design-basis D7 / system-invariants INV11** — 층별 적용 결정 명문화 + 자가점검.
+- **`NOTICE`** — 출처·라이선스 표기 (multica-ai/andrej-karpathy-skills, MIT 선언·LICENSE 파일 부재).
+
 ## [0.1.0] - 2026-06-01
 
 multi-agent-starter를 기반으로 Antigravity Orchestrator 버전을 생성했다.

@@ -44,6 +44,10 @@
 - `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json` — Claude Code·Codex 플러그인 매니페스트.
 - `skills/configure-multiagent/` — "멀티 에이전트 시스템 구성해줘" front door.
 - `LICENSE` — MIT.
+- **카파시 4원칙(운영 원칙) 도입** — 3 flavor 지침파일(claude/CLAUDE.md, codex·antigravity/AGENTS.md)에
+  "운영 원칙 (Operating Principles)" 섹션(verbatim 차용), `_templates/worker-brief.md`에 워커 번역형
+  고정 블록("Worker 행동 규약"). 층별 적용 근거는 각 flavor design-basis(D8/D7/D7)·invariant(INV12/INV11/INV11).
+  출처: multica-ai/andrej-karpathy-skills (MIT) — 표기 정본 `NOTICE`(루트 + 3 flavor).
 
 ### Changed
 - 배포: clone → 플러그인(`/plugins` 마켓플레이스) / ZIP fallback.

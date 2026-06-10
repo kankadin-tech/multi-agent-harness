@@ -19,8 +19,9 @@
 | INV9 | gemini 백엔드가 `_shared/backends.json`에서 `agy` CLI(call_type cli·command agy)이고 기본 모델 `gemini-3.1-pro-high`, routing.md·D4가 backends를 정본으로 참조 | 정본이 폐기 프록시/known-bad 경로 호출 (D4 위반) |
 | INV10 | 폐기 브리지 **`mcp__gemini__gemini_*`(CLI 래퍼) 및 `mcp__gemini-pro__*`(프록시)** 가 routing.md·task-folder.md·CLAUDE.md에 **활성 호출**로 없음. 잔여 언급은 **폐기 안내 문맥에서만** | C2 재발 — 폐기 브리지 잔존 호출이 즉시 실패 (D4 위반) |
 | INV11 | 재진입 프로토콜이 orchestrator-rules.md §3 **와** CLAUDE.md Task Lifecycle 포인터에 **둘 다** 존재. routing.md 토폴로지표에 4패턴(Pipeline/Fan-out·in/Expert Pool/Producer-Reviewer) 모두 존재하고, Supervisor·Hierarchical은 "배제" 줄에만 등장(채택표 행으로 등장 금지) | D6 위반 — 재진입/패턴 규정 유실 또는 배제 패턴 부활 |
+| INV12 | 카파시 4원칙: CLAUDE.md에 "운영 원칙 (Operating Principles)" 섹션 존재, _templates/worker-brief.md에 "Worker 행동 규약" 고정 블록 존재, **블록 안에 사용자질문 지시(질문/ask) 없음**, worker-result.md 체크리스트에 표면화 항목 존재 | D8 위반 — 층별 적용 붕괴(워커 one-shot 구조와 모순) 또는 워커 규약 유실 |
 
-> ※ **매뉴얼(외부 repo) 비교 항목은 유지보수자 전용(optional)**. 공개 설치본에는 매뉴얼이 없으므로 핵심 점검(INV1–4·6–11)은 시스템 파일 자체 일관성만 본다. INV5와 각 INV의 매뉴얼 측 일치 검사는 아래 스크립트의 optional 블록에서 매뉴얼이 있을 때만 실행된다.
+> ※ **매뉴얼(외부 repo) 비교 항목은 유지보수자 전용(optional)**. 공개 설치본에는 매뉴얼이 없으므로 핵심 점검(INV1–4·6–12)은 시스템 파일 자체 일관성만 본다. INV5와 각 INV의 매뉴얼 측 일치 검사, INV12e/f의 3 flavor 교차 점검은 아래 스크립트의 optional 블록에서 해당 자산이 있을 때만 실행된다.
 
 ## 자가 점검 스크립트
 
@@ -71,6 +72,27 @@ for p in 'Pipeline' 'Fan-out/Fan-in' 'Expert Pool' 'Producer-Reviewer'; do
 done
 echo "INV11c Supervisor/Hierarchical 은 '배제' 줄에만 (배제 아닌 등장 0이어야 PASS)"
 grep -nE 'Supervisor|Hierarchical' "$ROOT/_shared/routing.md" | grep -v '배제' || echo " (배제 외 등장 없음 = PASS)"
+
+echo "INV12a 운영 원칙 섹션 (CLAUDE.md 에 존재해야)"
+grep -n '운영 원칙 (Operating Principles)' "$ROOT/CLAUDE.md"
+echo "INV12b Worker 행동 규약 고정 블록 (worker-brief 에 존재해야)"
+grep -n 'Worker 행동 규약' "$ROOT/_templates/worker-brief.md"
+echo "INV12c 블록 내 사용자질문 표현 (출력 없어야 PASS)"
+sed -n '/^## Worker 행동 규약/,/^## Execution/p' "$ROOT/_templates/worker-brief.md" | grep -inE '질문|ask' || echo " (없음 = PASS)"
+echo "INV12d result 체크리스트 표면화 항목 (존재해야)"
+grep -n '표면화' "$ROOT/_templates/worker-result.md"
+
+# ── 유지보수자 전용 (optional): 3 flavor 교차 점검 (generator templates 있을 때만) ──
+TPL="$ROOT/plugins/multi-agent-starter/skills/configure-multiagent/generator/templates"
+if [ -d "$TPL" ]; then
+  echo "[유지보수자] INV12e Operating Principles 섹션 — codex/antigravity AGENTS.md (2개 나와야 PASS)"
+  grep -l 'Operating Principles' "$TPL/codex/AGENTS.md" "$TPL/antigravity/AGENTS.md"
+  echo "[유지보수자] INV12f Worker 행동 규약 블록 — 3 flavor worker-brief (3개 나와야 PASS)"
+  grep -l 'Worker 행동 규약' "$TPL/claude/_templates/worker-brief.md" \
+    "$TPL/codex/_templates/worker-brief.md" "$TPL/antigravity/_templates/worker-brief.md"
+else
+  echo "(generator templates 없음 — 교차 flavor 점검 건너뜀. 설치본은 정상.)"
+fi
 
 # ── 유지보수자 전용 (optional): 외부 매뉴얼 일관성 ──
 # 공개 배포본에는 매뉴얼이 없다. 매뉴얼 repo를 함께 관리하는 유지보수자 환경에서만 실행된다.

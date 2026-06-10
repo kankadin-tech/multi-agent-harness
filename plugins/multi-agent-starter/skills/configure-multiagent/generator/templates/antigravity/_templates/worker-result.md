@@ -25,6 +25,7 @@ tokens_used: (선택)
 - [ ] 파일 경로 실존 확인
 - [ ] task.md constraints 충족
 - [ ] Do NOT 항목 위반 없음
+- [ ] 가정·불일치가 Issues/Caveats에 표면화됨
 
 ## Issues / Caveats
 
