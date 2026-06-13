@@ -14,6 +14,7 @@ flavor 템플릿(claude | codex | antigravity)을 대상 폴더에 복사한다.
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,12 @@ TEMPLATES_DIR = SCRIPT_DIR / "templates"
 FLAVORS = ("claude", "codex", "antigravity")
 # 사용자 데이터 디렉토리 — 내용물은 절대 덮어쓰거나 지우지 않는다(.gitkeep만 보장).
 PRESERVE_DIRS = ("tasks", "_local")
+
+# flavor별 지침파일(에이전트가 자동 로드) — validate.py FLAVOR['instruction']과 일치해야.
+INSTRUCTION_FILE = {"claude": "CLAUDE.md", "codex": "AGENTS.md", "antigravity": "AGENTS.md"}
+# knot 자동층(--with-knot): 고정 스니펫을 대상 지침파일에만 주입. 마커로 멱등 재생성·제거 가능.
+KNOT_BLOCK = SCRIPT_DIR / "knot_block.md"
+KNOT_START, KNOT_END = "<!-- knot:start -->", "<!-- knot:end -->"
 
 
 def available_flavors() -> list[str]:
@@ -84,12 +91,33 @@ def copy_template(template_dir: Path, target: Path, dry: bool) -> list[Path]:
     return written
 
 
+def inject_knot(target: Path, flavor: str, dry: bool) -> str:
+    """대상 지침파일에 고정 knot 블록을 주입(멱등). 마커가 있으면 그 사이를 교체,
+    없으면 말미에 append. 루트/templates는 절대 건드리지 않음 — target 폴더 한정.
+    init.py의 결정성 유지: 모델 창작 없이 knot_block.md 그대로 삽입."""
+    block = KNOT_BLOCK.read_text(encoding="utf-8").strip("\n")
+    instr = target / INSTRUCTION_FILE[flavor]
+    text = instr.read_text(encoding="utf-8") if instr.is_file() else ""
+    if KNOT_START in text and KNOT_END in text:
+        new = re.sub(re.escape(KNOT_START) + r".*?" + re.escape(KNOT_END),
+                     block, text, count=1, flags=re.S)
+        action = "교체"
+    else:
+        new = text.rstrip("\n") + "\n\n" + block + "\n"
+        action = "추가"
+    if not dry:
+        instr.write_text(new, encoding="utf-8")
+    return f"knot 블록 {action} → {INSTRUCTION_FILE[flavor]}"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="MultiAgent 시스템 생성기 (결정적 스캐폴더)")
     ap.add_argument("--flavor", choices=FLAVORS, help="claude | codex | antigravity (생략 시 메뉴)")
     ap.add_argument("--target", help="설치 대상 폴더 (생략 시 질문)")
     ap.add_argument("--yes", action="store_true", help="확인 프롬프트 생략")
     ap.add_argument("--no-validate", action="store_true", help="설치 후 validate 건너뜀")
+    ap.add_argument("--with-knot", action="store_true",
+                    help="지침파일에 knot 지식 vault 관리블록 주입(선택, $KNOT_VAULT 게이트)")
     ap.add_argument("--dry-run", action="store_true", help="실제 쓰지 않고 미리보기")
     args = ap.parse_args()
 
@@ -117,6 +145,9 @@ def main() -> None:
     written = copy_template(template_dir, target, dry=args.dry_run)
     prefix = "(dry) " if args.dry_run else ""
     print(f"\n  {prefix}{len(written)}개 파일 {'복사 예정' if args.dry_run else '복사 완료'}.")
+
+    if args.with_knot:
+        print(f"  {prefix}{inject_knot(target, flavor, dry=args.dry_run)}")
 
     validate = SCRIPT_DIR / "validate.py"
     if not args.no_validate and not args.dry_run and validate.exists():

@@ -42,6 +42,29 @@ FLAVOR = {
 TOPOLOGY = ("Pipeline", "Fan-out/Fan-in", "Expert Pool", "Producer-Reviewer")
 LOG_TAGS = "DECISION | WORKER_CALL | VERIFICATION | ERROR | APPROVAL | COMPLETE"
 
+# knot 자동층(--with-knot로 주입). 미설치(마커 부재)는 정상 PASS.
+KNOT_BLOCK = SCRIPT_DIR / "knot_block.md"
+KNOT_START, KNOT_END = "<!-- knot:start -->", "<!-- knot:end -->"
+
+
+def _knot_check(instr_txt: str) -> tuple[bool, str]:
+    """C10: knot 마커가 있으면 (a)짝 맞고 (b)본문이 knot_block.md와 일치하고
+    (c)중복 마커 없음. 마커가 없으면 PASS(미설치 정상)."""
+    starts, ends = instr_txt.count(KNOT_START), instr_txt.count(KNOT_END)
+    if starts == 0 and ends == 0:
+        return True, "knot 마커 없음(미설치 — 정상)"
+    if starts != 1 or ends != 1:
+        return False, f"knot 마커 짝/중복 오류(start={starts}, end={ends})"
+    m = re.search(re.escape(KNOT_START) + r".*?" + re.escape(KNOT_END), instr_txt, re.S)
+    if not m:
+        return False, "knot 마커 순서 오류(start가 end보다 뒤)"
+    if not KNOT_BLOCK.is_file():
+        return False, "knot_block.md 없음(정본 부재)"
+    canonical = KNOT_BLOCK.read_text(encoding="utf-8").strip("\n")
+    if m.group(0).strip("\n") != canonical:
+        return False, "knot 블록 본문이 knot_block.md와 불일치"
+    return True, "knot 블록 정본 일치"
+
 
 def read(target: Path, rel: str) -> str | None:
     p = target / rel
@@ -127,6 +150,10 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
     check(not problems, f"C9 backends.json 스키마 (문제: {problems[0] if problems else '-'})")
     check((target / "_shared/adapters/call_worker.sh").is_file(),
           "C9b 디스패처 _shared/adapters/call_worker.sh 존재")
+
+    # C10 knot 자동층(선택). 마커 부재 = 미설치 정상 PASS, 존재 시 짝·정본·중복 검사.
+    k_ok, k_why = _knot_check(instr_txt)
+    check(k_ok, f"C10 knot 관리블록 — {k_why}")
 
     return results
 
