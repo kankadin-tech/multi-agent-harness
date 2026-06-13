@@ -16,12 +16,21 @@ description: Use when the user wants to set up / scaffold / install a file-based
    - `antigravity` — Antigravity 오케스트레이터 (Gemini 3.1 Pro High; 워커: claude-main / codex-main / codex-critic, 멀티모달은 오케스트레이터 직접)
 2. **대상 폴더 확인** — 어디에 설치할지 묻는다. (상위 폴더 오인 주의 — 정확한 경로를 확인받는다.)
 3. **생성기 위치** — `generator/`는 **이 SKILL.md와 같은 폴더 안**에 있다(스킬 자기완결). 호스트별 분기 불필요 — 이 스킬 폴더 기준 `./generator/init.py`. (Claude는 `$CLAUDE_PLUGIN_ROOT/skills/configure-multiagent/generator/init.py`로 해석됨.)
-4. **실행** — 확인 후 (이 스킬 폴더의 generator 경로로):
+4. **knot 지식 vault 지원? (선택, 기본 미설치)** — `init.py` 실행 직전 한 번 묻는다:
+   > "knot 지식 vault 지원도 같이 설치할까요? (선택 — 기본은 미설치)"
+
+   knot = 벤더중립 평문 마크다운 지식 vault. 설치하면 컨텍스트 파일에 관리블록 + `knot` 능동 스킬(save/ingest/query/lint)이 추가되고, 나중에 `$KNOT_VAULT`로 실제 vault에 연결한다. opt-in이라 확실치 않으면 **아니오**가 기본.
+   - **예** → 다음 실행 명령에 `--with-knot`를 붙인다.
+   - **아니오** → 플래그 없이 기존대로 진행.
+5. **실행** — 확인 후 (이 스킬 폴더의 generator 경로로):
    ```bash
-   python3 "<이 스킬 폴더>/generator/init.py" --flavor <claude|codex|antigravity> --target "<대상폴더>" --yes
+   python3 "<이 스킬 폴더>/generator/init.py" --flavor <claude|codex|antigravity> --target "<대상폴더>" [--with-knot] --yes
    ```
-   대화형으로 진행하려면 인자 없이 실행하면 메뉴가 뜬다.
-5. **결과 보고** — `init.py`가 끝에 `validate.py`를 자동 실행한다. 그 **PASS/FAIL을 그대로 사용자에게 보고**한다. FAIL이 하나라도 있으면 "완료"라고 말하지 말 것.
+   `--with-knot`는 4단계에서 "예"일 때만 붙인다(미설치가 기본). 대화형으로 진행하려면 인자 없이 실행하면 메뉴가 뜬다.
+6. **결과 보고** — `init.py`가 끝에 `validate.py`를 자동 실행한다. 그 **PASS/FAIL을 그대로 사용자에게 보고**한다. FAIL이 하나라도 있으면 "완료"라고 말하지 말 것.
+7. **knot 후속 안내 (`--with-knot`로 설치한 경우만)** — 결과 보고 뒤 이어서 알린다:
+   - `$KNOT_VAULT`를 설정해야 활성화된다(미설정이면 완전 no-op). shell rc에 `export KNOT_VAULT="<vault 경로>"`를 추가하고 새 셸에서 재로딩하도록 안내(자동 편집 금지).
+   - vault가 아직 없으면 두 갈래: **(a)** 빈 vault — `knot` 스킬을 부르면 setup(§0b)이 번들 스캐폴드를 복사하고 `git init` 한다. **(b)** 공개 빈 스캐폴드를 직접 클론: `git clone https://github.com/netwaif/knot "<vault 경로>"`.
 
 ## 동작 보장
 
