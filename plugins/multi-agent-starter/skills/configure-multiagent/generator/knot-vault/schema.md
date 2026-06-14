@@ -63,7 +63,7 @@ aliases: []               # 선택: 동의어·약칭
 
 ## git 규약
 
-- vault를 변경하는 실행(ingest, 자동수정 있는 lint, note를 저장한 query)은 **git commit으로 마무리**한다. git이 감사·복구·동시성 탐지 층이다.
+- vault를 변경하는 실행(save(inbox에 자료 추가), ingest, 자동수정 있는 lint, note를 저장한 query)은 **git commit으로 마무리**한다. git이 감사·복구·동시성 탐지 층이다.
 - 실행 시작 시 working tree가 더러우면(미커밋 변경 존재) 다른 실행이 진행 중일 수 있으므로 **중단하고 보고**한다.
 - 커밋 메시지: `ingest: <제목>` / `lint: <요약>` / `query: <제목>`. 트레일러에 실행한 실제 모델명을 남긴다 — 예: `Co-Authored-By: <실제 모델명>`
 - **push 금지** — 로컬 전용. 원격 연결은 사람이 결정한다.

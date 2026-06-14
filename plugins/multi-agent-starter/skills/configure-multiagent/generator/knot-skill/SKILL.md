@@ -103,8 +103,12 @@ chmod +x ~/.config/knot/notify.sh
 각 verb는 vault 정본을 **읽고 그대로 따른다**. 벤더(Claude / Codex / agy) 무관 — 동일 vault
 prompts를 호출한다(벤더 분기 없음).
 
-- **save** — 사용자가 준 자료(텍스트·파일·URL 메모)를 `$KNOT_VAULT/inbox/`에 새 파일로 저장.
-  파일명은 짧은 슬러그. 저장만 한다 — 컴파일은 ingest가 한다.
+- **save** — 사용자가 준 자료(텍스트·파일·URL 메모)를 `$KNOT_VAULT/inbox/`에 새 파일로 저장한 뒤
+  **그 파일만 커밋**한다. 파일명은 짧은 슬러그. 저장 후
+  `git add <그 파일> && git commit -m "save: <슬러그>"` (트레일러에 실행한 실제 모델명,
+  예: `Co-Authored-By: <실제 모델명>`). 커밋까지가 save — 그래야 트리가 깨끗해져 다음 ingest의
+  클린트리 가드에 막히지 않고, drain 실패복구의 reset도 미커밋 inbox를 지우지 않는다.
+  컴파일은 ingest가 한다.
 - **ingest** (compile) — `$KNOT_VAULT/prompts/ingest.md`를 정독하고 그 규약을 **그대로 실행**한다
   (inbox/지정 소스 → wiki 컴파일). 절차·단계는 그 파일에 있다.
 - **query** (read) — `$KNOT_VAULT/prompts/query.md`를 정독하고 그 규약으로 근거기반 질의응답.
