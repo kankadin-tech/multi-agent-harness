@@ -29,7 +29,7 @@ description: Use when the user wants to set up / scaffold / install a file-based
    `--with-knot`는 4단계에서 "예"일 때만 붙인다(미설치가 기본). 대화형으로 진행하려면 인자 없이 실행하면 메뉴가 뜬다.
 6. **결과 보고** — `init.py`가 끝에 `validate.py`를 자동 실행한다. 그 **PASS/FAIL을 그대로 사용자에게 보고**한다. FAIL이 하나라도 있으면 "완료"라고 말하지 말 것.
 7. **knot 후속 안내 (`--with-knot`로 설치한 경우만)** — 결과 보고 뒤 이어서 알린다:
-   - `$KNOT_VAULT`를 설정해야 활성화된다(미설정이면 완전 no-op). shell rc에 `export KNOT_VAULT="<vault 경로>"`를 추가하고 새 셸에서 재로딩하도록 안내(자동 편집 금지).
+   - vault 경로를 등록해야 활성화된다(미등록이면 완전 no-op). **포인터 파일 한 줄**을 안내한다: `mkdir -p ~/.config/knot && printf '%s\n' "<vault 경로>" > ~/.config/knot/vault` — rc `export`와 달리 GUI에서 띄운 호스트 앱(Codex·Antigravity)에도 닿고 셸 재로딩이 필요 없다. (power-user는 `export KNOT_VAULT=…`도 가능 — env가 파일보다 우선.)
    - vault가 아직 없으면 두 갈래: **(a)** 빈 vault — `knot` 스킬을 부르면 setup(§0b)이 번들 스캐폴드를 복사하고 `git init` 한다. **(b)** 공개 빈 스캐폴드를 직접 클론: `git clone https://github.com/netwaif/knot "<vault 경로>"`.
 
 ## 동작 보장
