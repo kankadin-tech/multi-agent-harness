@@ -5,6 +5,28 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.1.1] - 2026-06-25
+
+### Fixed
+- **오케스트레이터가 기존 작업의 후속·핸드오프를 사용자 확인 없이 새 task 폴더로 분리하던 문제.**
+  `_shared/orchestrator-rules.md` §3에 "새 작업 폴더 생성 게이트" 추가 — 분리 전 사용자 확인 강제 +
+  분리 시 parent·context 필독입력·메모리 포인터 연결고리. CLAUDE.md Task Lifecycle·`_templates/task-folder.md`에
+  포인터, generator 템플릿 3종(claude/codex/antigravity)에 전파. codex-critic/gemini 검수 반영
+  (확인 절차와 연결고리 분리·예외를 '독립 신규작업'으로 한정·경로 불문). 회귀 GREEN(test_generate all pass, INV8/11a).
+
+## [2.1.0] - 2026-06-17
+
+매뉴얼 v2.1과 정렬. (이전까지 `plugin.json`이 2.0.0에 머물러 배포 매뉴얼 2.1과 버전이 어긋나 있던 것을 동기화.)
+
+### Added
+- **knot 배포(P1~P6)** — 벤더중립 standalone 지식 vault. 능동층=플러그인 최상위 스킬(claude·codex·agy
+  네이티브 로드), 자동층=opt-in `--with-knot` 관리블록 주입(멱등). vault 경로=env `$KNOT_VAULT` +
+  `~/.config/knot/vault` 파일 fallback. `configure-multiagent`에 설치 제안 진입점.
+
+### Fixed
+- knot `save` verb가 inbox 파일을 커밋(save↔ingest 갭). vault 게이트 env→포인터파일 fallback
+  (GUI 호스트앱 진입장벽 제거). agy 능동 스킬을 플러그인 최상위로 승격(네이티브 로드).
+
 ## [2.0.0] - 미배포 (PR 머지 시 태깅)
 
 **Breaking**: 배포 방식을 "clone → 루트 파일 그대로 사용"에서 **생성기 + 플러그인**으로
@@ -103,6 +125,8 @@
 ### Verification
 - 배선(INV11a/b/c) PASS · 회귀 없음, 탁상 분기 커버리지, 실전 콜드세션 3/3 PASS, codex-critic adversarial 리뷰 5 ISSUE 반영.
 
+[2.1.1]: https://github.com/netwaif/multi-agent-starter/releases/tag/v2.1.1
+[2.1.0]: https://github.com/netwaif/multi-agent-starter/releases/tag/v2.1.0
 [2.0.0]: https://github.com/netwaif/multi-agent-starter/releases/tag/v2.0.0
 [1.0.1]: https://github.com/netwaif/multi-agent-starter/releases/tag/v1.0.1
 [1.0.0]: https://github.com/netwaif/multi-agent-starter/releases/tag/v1.0.0
