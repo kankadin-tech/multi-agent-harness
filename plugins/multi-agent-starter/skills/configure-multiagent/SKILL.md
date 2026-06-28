@@ -25,7 +25,7 @@ description: Use when the user wants to set up / scaffold / install a file-based
 4b. **goal 요금가드 지원? (선택, 기본 미설치)** — `init.py` 실행 직전 한 번 묻는다:
    > "goal 요금가드도 같이 설치할까요? (선택 — 기본은 미설치. codexbar+coach 필요)"
 
-   요금가드 = `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동으로 멈추는 벤더중립 안전장치. **예**를 고르면 flavor에 맞는 *배선*만 주입된다(claude=Stop 훅 → `coach --hook`, codex=`_shared/guard/` 워처, antigravity=미지원·no-op). 판정 *정책*은 전부 `coach`(usage-coach, codexbar 의존)가 단일 정본으로 갖고, 미설치·조회실패는 fail-open(작업 안 죽임). 확실치 않으면 **아니오**(나중에 재실행으로 추가 가능).
+   요금가드 = `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동으로 멈추는 벤더중립 안전장치. **예**를 고르면 flavor에 맞는 *배선*만 주입된다(claude=Stop 훅 → `coach --hook`, codex=`_shared/guard/` 워처, antigravity=미지원·no-op). 판정 *정책*은 전부 `coach`(usage-coach, codexbar 의존)가 단일 정본으로 갖고, 미설치·조회실패는 fail-open(작업 안 죽임). 확실치 않으면 **아니오**(나중에 재실행으로 추가 가능). (받기 — coach: https://github.com/netwaif/usage-coach · codexbar: https://github.com/steipete/CodexBar)
    - **예** → 다음 실행 명령에 `--with-guard`를 붙인다(배선 주입).
    - **아니오** → 플래그 없이 진행(가드 배선 생략).
 5. **실행** — 확인 후 (이 스킬 폴더의 generator 경로로):

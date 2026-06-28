@@ -22,6 +22,7 @@ WebSocket**으로 붙는다(외부 의존성 0). 가드 대상 `/goal` 세션은
 ## 사전 준비
 - **codexbar + `coach`**(가드 데이터·판정). `coach`가 PATH에 있어야 한다. 없으면 워처는 fail-open
   (아무것도 정지시키지 않음)으로 조용히 통과.
+  - coach 설치: <https://github.com/netwaif/usage-coach> · codexbar: <https://github.com/steipete/CodexBar>
 - **가드 켜기**: `coach guard on`(런타임 스위치, 벤더 무관 단일 플래그). 끄기=`coach guard off`,
   상태·미리보기=`coach guard status`.
 
