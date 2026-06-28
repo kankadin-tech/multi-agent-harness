@@ -10,20 +10,23 @@
 //   coach --guard-check 계약: 통과 = exit 0 + 무출력 / 정지 = exit≠0 또는 stdout에 사유 1줄.
 //   coach 미설치/조회실패 = fail-open(정지하지 않음 — 작업 안 죽임).
 //
-// 전제: 같은 머신에서 `codex remote-control start`로 공유 데몬이 떠 있고, 사용자의 대화형 /goal
-// 세션이 그 데몬에 붙어 있다. 워처는 `codex app-server proxy`로 같은 데몬에 JSON-RPC로 접속해
-// 현재 로드된(활성) thread만 열거(`thread/loaded/list`)하고 goal이 있는 것을 clear한다.
+// Transport(중요): codex의 app-server는 **loopback WebSocket**으로 붙는다. unix 소켓(control·
+// --listen unix://)은 UDS 위 WebSocket이고 `app-server proxy`는 stdio↔UDS 얇은 바이트파이프라
+// raw JSON-RPC가 안 통한다(실측). 그래서 워처는 `codex app-server --listen ws://127.0.0.1:PORT`로
+// 띄운 서버에 **node 네이티브 WebSocket**으로 붙는다(의존성 0, 인증 0=loopback). 가드 대상 /goal
+// 세션은 같은 서버에 `codex --remote ws://127.0.0.1:PORT`로 attach돼 있어야 워처가 그 thread를 본다.
+// 절차 상세 = _shared/guard/README.md. ⚠️ loopback 무인증 → 같은 머신 로컬 프로세스가 제어 가능.
 //
 // 실행:  node _shared/guard/codex_goal_watch.mjs
-// 환경:  GUARD_INTERVAL=초(기본 60) · GUARD_SOCK=소켓경로(생략 시 기본 control socket)
-//        GUARD_PROVIDERS=coach에 넘길 provider(기본 codex)
+// 환경:  GUARD_INTERVAL=초(기본 60) · GUARD_WS_PORT=포트(기본 47931) ·
+//        GUARD_WS_URL=ws URL(기본 ws://127.0.0.1:$GUARD_WS_PORT) · GUARD_PROVIDERS=coach provider(기본 codex)
 // 정지:  Ctrl-C. 가드 자체를 끄려면 `coach guard off`(워처는 coach 결정을 따르므로 즉시 무력화).
 
 import { spawn } from "node:child_process";
-import readline from "node:readline";
 
 const INTERVAL_MS = Math.max(5, parseInt(process.env.GUARD_INTERVAL || "60", 10)) * 1000;
-const SOCK = process.env.GUARD_SOCK || "";
+const PORT = parseInt(process.env.GUARD_WS_PORT || "47931", 10);
+const WS_URL = process.env.GUARD_WS_URL || `ws://127.0.0.1:${PORT}`;
 const PROVIDERS = process.env.GUARD_PROVIDERS || "codex";
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);
@@ -47,44 +50,26 @@ function shouldStop() {
   });
 }
 
-// ── app-server JSON-RPC over `codex app-server proxy` (stdio ↔ control socket) ──
-let app = null;
+// ── app-server JSON-RPC over 네이티브 WebSocket(loopback) ──
+let ws = null;
 let nextId = 1;
 const pending = new Map();
 
-function startProxy() {
-  const args = ["app-server", "proxy"];
-  if (SOCK) args.push("--sock", SOCK);
-  app = spawn("codex", args, { stdio: ["pipe", "pipe", "pipe"] });
-  app.stderr.on("data", (d) => log("[proxy.stderr]", d.toString().trim()));
-  app.on("exit", (code, sig) => {
-    log("[proxy.exit]", code, sig);
-    for (const [, e] of pending) e.reject(new Error("proxy exited"));
-    pending.clear();
-    process.exit(code === 0 ? 0 : 1);
-  });
-  const rl = readline.createInterface({ input: app.stdout });
-  rl.on("line", (raw) => {
-    let msg;
-    try { msg = JSON.parse(raw); } catch { return; }
-    if (Object.prototype.hasOwnProperty.call(msg, "id") && pending.has(msg.id)) {
-      const e = pending.get(msg.id);
-      pending.delete(msg.id);
-      e.resolve(msg);
-    }
-  });
-}
-
 function request(method, params = {}, timeoutMs = 30000) {
   const id = nextId++;
-  app.stdin.write(JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n");
+  ws.send(JSON.stringify({ jsonrpc: "2.0", id, method, params }));
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => { pending.delete(id); reject(new Error(`timeout ${method}`)); }, timeoutMs);
     pending.set(id, { resolve: (m) => { clearTimeout(t); resolve(m); }, reject: (e) => { clearTimeout(t); reject(e); } });
   });
 }
 
-const threadIdOf = (it) => it?.id || it?.threadId || it?.thread?.id || null;
+function notify(method, params = {}) {
+  ws.send(JSON.stringify({ jsonrpc: "2.0", method, params }));
+}
+
+// thread/loaded/list의 data 항목은 **thread ID 문자열**이다(실측). 객체로 올 경우도 방어.
+const threadIdOf = (it) => (typeof it === "string" ? it : (it?.id || it?.threadId || it?.thread?.id || null));
 
 // 현재 로드된 thread 중 active goal을 가진 것을 clear. 반환 = clear한 threadId 배열.
 async function clearActiveGoals(reason) {
@@ -117,17 +102,34 @@ async function tick() {
   try { await clearActiveGoals(decision.reason); } catch (e) { log("[guard.error]", String(e)); }
 }
 
-async function main() {
-  startProxy();
-  await request("initialize", {
-    clientInfo: { name: "codex-goal-guard-watch", version: "1" },
-    capabilities: { experimentalApi: true, requestAttestation: false },
-  }).catch((e) => { log("[initialize.error]", String(e)); process.exit(1); });
-  log("요금가드 워처 시작 — interval", INTERVAL_MS / 1000 + "s, providers", PROVIDERS,
-      "(가드 on/off는 `coach guard on/off`)");
-  await tick();
-  setInterval(tick, INTERVAL_MS);
+function main() {
+  ws = new WebSocket(WS_URL);
+  ws.onmessage = (ev) => {
+    const raw = typeof ev.data === "string" ? ev.data : ev.data.toString();
+    let msg; try { msg = JSON.parse(raw); } catch { return; }
+    if (Object.prototype.hasOwnProperty.call(msg, "id") && pending.has(msg.id)) {
+      const e = pending.get(msg.id);
+      pending.delete(msg.id);
+      e.resolve(msg);
+    }
+  };
+  ws.onopen = async () => {
+    try {
+      await request("initialize", {
+        clientInfo: { name: "codex-goal-guard-watch", version: "1" },
+        capabilities: { experimentalApi: true, requestAttestation: false },
+      });
+      notify("initialized", {});
+    } catch (e) { log("[initialize.error]", String(e)); process.exit(1); }
+    log("요금가드 워처 시작 —", WS_URL, "interval", INTERVAL_MS / 1000 + "s, providers", PROVIDERS,
+        "(가드 on/off는 `coach guard on/off`)");
+    await tick();
+    setInterval(tick, INTERVAL_MS);
+  };
+  ws.onerror = (e) => log("[ws.error]", e?.message || String(e),
+    `— ws 서버(${WS_URL})가 떠 있는지 확인: codex app-server --listen ws://127.0.0.1:${PORT}`);
+  ws.onclose = () => { log("[ws.close] 종료"); process.exit(1); };
 }
 
-process.on("SIGINT", () => { log("종료합니다."); if (app && !app.killed) app.kill("SIGTERM"); process.exit(0); });
-main().catch((e) => { log("[fatal]", String(e)); process.exit(1); });
+process.on("SIGINT", () => { log("종료합니다."); try { ws?.close(); } catch {} process.exit(0); });
+main();

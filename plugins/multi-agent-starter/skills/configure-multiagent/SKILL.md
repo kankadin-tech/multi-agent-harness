@@ -39,7 +39,8 @@ description: Use when the user wants to set up / scaffold / install a file-based
    - vault가 아직 없으면 두 갈래: **(a)** 빈 vault — `knot` 스킬을 부르면 setup(§0b)이 번들 스캐폴드를 복사하고 `git init` 한다. **(b)** 공개 빈 스캐폴드를 직접 클론: `git clone https://github.com/netwaif/knot "<vault 경로>"`.
 7b. **요금가드 후속 안내 (`--with-guard`로 설치한 경우만)** — 결과 보고 뒤 이어서 알린다:
    - 활성화 전제: **codexbar + `coach`(PATH에 있어야)** 설치 + `coach guard on`(런타임 스위치, 벤더 무관 단일 플래그). 끄기 = `coach guard off`, 상태·미리보기 = `coach guard status`. 미설치·플래그 off·조회실패는 모두 fail-open(작업 안 죽임).
-   - **codex flavor**는 추가로: 공유 데몬을 `codex remote-control start`로 띄우고, `/goal` 세션과 함께 워처를 실행한다 — `node _shared/guard/codex_goal_watch.mjs` (상세 = `_shared/guard/README.md`). **claude flavor**는 Stop 훅이라 별도 프로세스 불필요.
+   - **claude flavor**는 Stop 훅이라 별도 프로세스 불필요(`settings.json` 한 줄로 끝).
+   - **codex flavor**는 셋업이 다르다 — 3단계(상세 = `_shared/guard/README.md`): ① 가드용 loopback ws 서버 `codex app-server --listen ws://127.0.0.1:47931`, ② `/goal` 세션을 `codex --remote ws://127.0.0.1:47931`로 시작(같은 서버에 attach — 안 하면 워처가 thread를 못 봄), ③ 워처 `node _shared/guard/codex_goal_watch.mjs`(포트 셋이 동일해야, 기본 47931·env `GUARD_WS_PORT`). ⚠️ loopback 무인증이라 같은 머신 로컬 프로세스가 그 세션을 제어할 수 있음(신뢰된 단일 사용자 머신 가정).
 
 ## 동작 보장
 
