@@ -22,15 +22,24 @@ description: Use when the user wants to set up / scaffold / install a file-based
    knot = 벤더중립 평문 마크다운 지식 vault. `knot` 능동 스킬(save/ingest/query/lint)은 플러그인에 포함돼 어느 flavor(claude·codex·antigravity)에서든 이미 가용하고 `$KNOT_VAULT` 게이트로 동작한다. 여기서 **예**를 고르면 컨텍스트 파일에 관리블록(자동층)이 추가돼, 에이전트가 작업 중 관련되면 knot을 **알아서 참고**한다. opt-in이라 확실치 않으면 **아니오**(그래도 "knot에 저장" 같은 명시 요청엔 능동 스킬이 동작).
    - **예** → 다음 실행 명령에 `--with-knot`를 붙인다(관리블록 주입).
    - **아니오** → 플래그 없이 진행(능동 스킬은 그대로 가용, 관리블록만 생략).
+4b. **goal 요금가드 지원? (선택, 기본 미설치)** — `init.py` 실행 직전 한 번 묻는다:
+   > "goal 요금가드도 같이 설치할까요? (선택 — 기본은 미설치. codexbar+coach 필요)"
+
+   요금가드 = `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동으로 멈추는 벤더중립 안전장치. **예**를 고르면 flavor에 맞는 *배선*만 주입된다(claude=Stop 훅 → `coach --hook`, codex=`_shared/guard/` 워처, antigravity=미지원·no-op). 판정 *정책*은 전부 `coach`(usage-coach, codexbar 의존)가 단일 정본으로 갖고, 미설치·조회실패는 fail-open(작업 안 죽임). 확실치 않으면 **아니오**(나중에 재실행으로 추가 가능).
+   - **예** → 다음 실행 명령에 `--with-guard`를 붙인다(배선 주입).
+   - **아니오** → 플래그 없이 진행(가드 배선 생략).
 5. **실행** — 확인 후 (이 스킬 폴더의 generator 경로로):
    ```bash
-   python3 "<이 스킬 폴더>/generator/init.py" --flavor <claude|codex|antigravity> --target "<대상폴더>" [--with-knot] --yes
+   python3 "<이 스킬 폴더>/generator/init.py" --flavor <claude|codex|antigravity> --target "<대상폴더>" [--with-knot] [--with-guard] --yes
    ```
-   `--with-knot`는 4단계에서 "예"일 때만 붙인다(미설치가 기본). 대화형으로 진행하려면 인자 없이 실행하면 메뉴가 뜬다.
+   `--with-knot`/`--with-guard`는 각각 4·4b단계에서 "예"일 때만 붙인다(둘 다 미설치가 기본). 대화형으로 진행하려면 인자 없이 실행하면 메뉴가 뜬다.
 6. **결과 보고** — `init.py`가 끝에 `validate.py`를 자동 실행한다. 그 **PASS/FAIL을 그대로 사용자에게 보고**한다. FAIL이 하나라도 있으면 "완료"라고 말하지 말 것.
 7. **knot 후속 안내 (`--with-knot`로 설치한 경우만)** — 결과 보고 뒤 이어서 알린다:
    - vault 경로를 등록해야 활성화된다(미등록이면 완전 no-op). **포인터 파일 한 줄**을 안내한다: `mkdir -p ~/.config/knot && printf '%s\n' "<vault 경로>" > ~/.config/knot/vault` — rc `export`와 달리 GUI에서 띄운 호스트 앱(Codex·Antigravity)에도 닿고 셸 재로딩이 필요 없다. (power-user는 `export KNOT_VAULT=…`도 가능 — env가 파일보다 우선.)
    - vault가 아직 없으면 두 갈래: **(a)** 빈 vault — `knot` 스킬을 부르면 setup(§0b)이 번들 스캐폴드를 복사하고 `git init` 한다. **(b)** 공개 빈 스캐폴드를 직접 클론: `git clone https://github.com/netwaif/knot "<vault 경로>"`.
+7b. **요금가드 후속 안내 (`--with-guard`로 설치한 경우만)** — 결과 보고 뒤 이어서 알린다:
+   - 활성화 전제: **codexbar + `coach`(PATH에 있어야)** 설치 + `coach guard on`(런타임 스위치, 벤더 무관 단일 플래그). 끄기 = `coach guard off`, 상태·미리보기 = `coach guard status`. 미설치·플래그 off·조회실패는 모두 fail-open(작업 안 죽임).
+   - **codex flavor**는 추가로: 공유 데몬을 `codex remote-control start`로 띄우고, `/goal` 세션과 함께 워처를 실행한다 — `node _shared/guard/codex_goal_watch.mjs` (상세 = `_shared/guard/README.md`). **claude flavor**는 Stop 훅이라 별도 프로세스 불필요.
 
 ## 동작 보장
 

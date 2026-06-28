@@ -49,6 +49,48 @@ KNOT_START, KNOT_END = "<!-- knot:start -->", "<!-- knot:end -->"
 # 않으므로 워크스페이스 검증 대상 아님. C10(관리블록 정본)만 검사한다.
 
 
+# goal 요금가드(--with-guard로 주입). 미설치(산출물 부재)는 정상 PASS.
+GUARD_DIR = SCRIPT_DIR / "guard"
+GUARD_HOOK_MARKER = "coach --hook"
+
+
+def _guard_check(target: Path, flavor: str) -> tuple[bool, str]:
+    """C12: --with-guard 배선이 정본과 일치하는지. 산출물이 없으면 PASS(미설치 정상).
+    claude = .claude/settings.json Stop에 guard 항목(마커)이 정확히 1개·정본 일치 / codex =
+    _shared/guard/codex_goal_watch.mjs 정본 바이트일치 / antigravity = 가드 없음(항상 PASS)."""
+    if flavor == "antigravity":
+        return True, "가드 미지원 flavor(정상)"
+    if flavor == "claude":
+        p = target / ".claude" / "settings.json"
+        if not p.is_file():
+            return True, "settings.json 없음(미설치 — 정상)"
+        try:
+            stop = json.loads(p.read_text(encoding="utf-8")).get("hooks", {}).get("Stop", [])
+        except Exception:  # noqa: BLE001
+            return False, "settings.json 파싱 실패"
+        if not isinstance(stop, list):
+            return False, "hooks.Stop가 배열 아님"
+        guard = [e for e in stop if GUARD_HOOK_MARKER in json.dumps(e, ensure_ascii=False)]
+        if not guard:
+            return True, "guard Stop 훅 없음(미설치 — 정상)"
+        if len(guard) != 1:
+            return False, f"guard Stop 훅 중복({len(guard)}개)"
+        canonical = json.loads((GUARD_DIR / "claude_hook.json").read_text(encoding="utf-8"))
+        if guard[0] != canonical:
+            return False, "guard Stop 훅이 claude_hook.json 정본과 불일치"
+        return True, "guard Stop 훅 정본 일치"
+    # codex
+    p = target / "_shared" / "guard" / "codex_goal_watch.mjs"
+    if not p.is_file():
+        return True, "워처 없음(미설치 — 정상)"
+    canonical = GUARD_DIR / "codex_goal_watch.mjs"
+    if not canonical.is_file():
+        return False, "codex_goal_watch.mjs 정본 부재"
+    if p.read_text(encoding="utf-8") != canonical.read_text(encoding="utf-8"):
+        return False, "워처가 codex_goal_watch.mjs 정본과 불일치"
+    return True, "guard 워처 정본 일치"
+
+
 def _knot_check(instr_txt: str) -> tuple[bool, str]:
     """C10: knot 마커가 있으면 (a)짝 맞고 (b)본문이 knot_block.md와 일치하고
     (c)중복 마커 없음. 마커가 없으면 PASS(미설치 정상)."""
@@ -156,6 +198,10 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
     # C10 knot 자동층(선택). 마커 부재 = 미설치 정상 PASS, 존재 시 짝·정본·중복 검사.
     k_ok, k_why = _knot_check(instr_txt)
     check(k_ok, f"C10 knot 관리블록 — {k_why}")
+
+    # C12 goal 요금가드(선택). 산출물 부재 = 미설치 정상 PASS, 존재 시 정본 일치 검사.
+    g_ok, g_why = _guard_check(target, flavor)
+    check(g_ok, f"C12 요금가드 배선 — {g_why}")
 
     return results
 

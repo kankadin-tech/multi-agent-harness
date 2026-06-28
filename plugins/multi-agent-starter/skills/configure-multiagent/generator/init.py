@@ -14,6 +14,7 @@ flavor 템플릿(claude | codex | antigravity)을 대상 폴더에 복사한다.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
@@ -31,6 +32,10 @@ INSTRUCTION_FILE = {"claude": "CLAUDE.md", "codex": "AGENTS.md", "antigravity": 
 # knot 자동층(--with-knot): 고정 스니펫을 대상 지침파일에만 주입. 마커로 멱등 재생성·제거 가능.
 KNOT_BLOCK = SCRIPT_DIR / "knot_block.md"
 KNOT_START, KNOT_END = "<!-- knot:start -->", "<!-- knot:end -->"
+# goal 요금가드(--with-guard): opt-in 가드 *배선*만 주입(정책은 coach=usage-coach 단일정본).
+# 결정성 유지 — 고정 정본 파일을 결정적으로 복사/병합할 뿐 모델 창작 없음(knot과 동일 부류).
+GUARD_DIR = SCRIPT_DIR / "guard"
+GUARD_HOOK_MARKER = "coach --hook"   # claude settings.json Stop 항목 식별자(멱등 dedup용)
 # knot 능동 스킬은 플러그인 최상위 skills/knot/ 로 배포된다(configure-multiagent와 동일하게
 # 호스트가 네이티브 로드). 워크스페이스로 복사하지 않는다 — agy는 워크스페이스 스킬을 스캔하지
 # 않고 글로벌 플러그인 스킬만 로드하므로(검증: gemini가 가용 스킬 목록에 knot 확인). claude/codex도
@@ -114,6 +119,50 @@ def inject_knot(target: Path, flavor: str, dry: bool) -> str:
     return f"knot 블록 {action} → {INSTRUCTION_FILE[flavor]}"
 
 
+def _claude_settings_with_guard(existing: str, entry: dict) -> str:
+    """기존 settings.json(없으면 빈 dict)에 guard Stop 항목을 멱등 병합.
+    사용자가 손수 넣은 다른 Stop 훅은 보존, guard 항목(마커)만 dedup 후 정본으로 교체."""
+    try:
+        data = json.loads(existing) if existing.strip() else {}
+    except json.JSONDecodeError:
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    hooks = data.get("hooks")
+    if not isinstance(hooks, dict):
+        hooks = data["hooks"] = {}
+    stop = hooks.get("Stop")
+    if not isinstance(stop, list):
+        stop = hooks["Stop"] = []
+    stop[:] = [e for e in stop if GUARD_HOOK_MARKER not in json.dumps(e, ensure_ascii=False)]
+    stop.append(entry)
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+
+
+def inject_guard(target: Path, flavor: str, dry: bool) -> str:
+    """opt-in goal 요금가드 *배선*을 대상에 주입(멱등). 정책은 coach(usage-coach) 단일정본.
+    claude = .claude/settings.json Stop 훅(coach --hook) / codex = _shared/guard/ 워처 복사 /
+    antigravity = no-op(agy /goal 루프 없음). init.py 결정성 유지(고정 정본 복사·병합만)."""
+    if flavor == "antigravity":
+        return "guard 미지원(agy /goal 자율 루프 없음) — 변경 없음(다음 버전)"
+    if flavor == "claude":
+        entry = json.loads((GUARD_DIR / "claude_hook.json").read_text(encoding="utf-8"))
+        dest = target / ".claude" / "settings.json"
+        existing = dest.read_text(encoding="utf-8") if dest.is_file() else ""
+        text = _claude_settings_with_guard(existing, entry)
+        if not dry:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(text, encoding="utf-8")
+        return "guard Stop 훅 주입 → .claude/settings.json (coach --hook)"
+    # codex
+    out = target / "_shared" / "guard"
+    for name in ("codex_goal_watch.mjs", "README.md"):
+        if not dry:
+            out.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(GUARD_DIR / name, out / name)
+    return "guard 워처 복사 → _shared/guard/ (codex_goal_watch.mjs)"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="MultiAgent 시스템 생성기 (결정적 스캐폴더)")
     ap.add_argument("--flavor", choices=FLAVORS, help="claude | codex | antigravity (생략 시 메뉴)")
@@ -122,6 +171,8 @@ def main() -> None:
     ap.add_argument("--no-validate", action="store_true", help="설치 후 validate 건너뜀")
     ap.add_argument("--with-knot", action="store_true",
                     help="지침파일에 knot 지식 vault 관리블록 주입(선택, $KNOT_VAULT 게이트)")
+    ap.add_argument("--with-guard", action="store_true",
+                    help="opt-in goal 요금가드 배선 주입(선택, claude=Stop훅 / codex=워처. 런타임 on/off=coach guard)")
     ap.add_argument("--dry-run", action="store_true", help="실제 쓰지 않고 미리보기")
     args = ap.parse_args()
 
@@ -152,6 +203,9 @@ def main() -> None:
 
     if args.with_knot:
         print(f"  {prefix}{inject_knot(target, flavor, dry=args.dry_run)}")
+
+    if args.with_guard:
+        print(f"  {prefix}{inject_guard(target, flavor, dry=args.dry_run)}")
 
     validate = SCRIPT_DIR / "validate.py"
     if not args.no_validate and not args.dry_run and validate.exists():

@@ -2,6 +2,16 @@
 
 이 파일은 multi-agent-starter (Codex flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.3.0] - 2026-06-28
+
+### Added
+- **opt-in goal 요금가드 배선(`--with-guard`)** — 설치 시 `--with-guard`를 주면 `_shared/guard/`에
+  워처(`codex_goal_watch.mjs`)와 README가 들어온다. `codex remote-control start`로 공유 데몬을 띄우고
+  워처를 실행하면, `/goal` 루프가 주간 사용량 한도에 닿을 때 `app-server proxy`로 활성 goal thread를
+  `thread/goal/clear`해 정지시킨다(Codex는 Stop훅으로 못 멈춰 외부 워처 필요). 기본 미설치, 런타임
+  on/off=`coach guard on/off`. 정책은 `coach`(usage-coach, codexbar 의존)가 갖고 미설치·조회실패는
+  fail-open. 상세=`_shared/guard/README.md`.
+
 ## [0.2.0] - 2026-06-10
 
 카파시(Karpathy) 4원칙을 층별로 도입. 기존 규칙과 충돌 없음(보강).

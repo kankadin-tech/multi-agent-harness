@@ -5,6 +5,20 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.2.0] - 2026-06-28
+
+### Added
+- **opt-in goal 요금가드(`--with-guard`)** — `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동
+  정지하는 벤더중립 안전장치. 기본 미설치. **정책=`coach`(usage-coach, codexbar 의존) 단일정본,
+  하네스=배선만**. flavor별 주입: claude=`.claude/settings.json` Stop훅(`coach --hook`, inline
+  `command -v coach … || true` fail-open), codex=`_shared/guard/` 워처(`codex app-server proxy`→
+  `thread/loaded/list`→`thread/goal/clear`). antigravity는 `/goal` 자율 루프 부재로 미지원(다음 버전).
+  런타임 on/off=`coach guard on/off/status`. 미설치·플래그 off·조회실패는 모두 fail-open. generator
+  결정성 불변(init.py 고정 정본 복사·병합만, knot `--with-knot`과 동형). `configure-multiagent` SKILL에
+  opt-in 질문(4b)·후속안내(7b) 추가. 회귀보호=validate **C12** + test_generate guard_checks(3 flavor ×
+  주입·멱등·기본부재). 설계근거 `_shared/design-basis.md` **D10**. coach 정책층 = 별도 핸드오프
+  (usage-coach repo, tasks/harness-quota-guard/workers/handoff-usage-coach.md). (tasks/harness-quota-guard/)
+
 ## [2.1.1] - 2026-06-25
 
 ### Fixed

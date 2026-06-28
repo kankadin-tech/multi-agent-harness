@@ -3,6 +3,14 @@
 이 파일은 MultiAgent orchestration 시스템의 주요 변경을 기록한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [1.2.0] - 2026-06-28
+
+### Added
+- **opt-in goal 요금가드 배선(`--with-guard`)** — 설치 시 `--with-guard`를 주면 `.claude/settings.json`에
+  Stop 훅(`coach --hook`)이 주입된다. `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동 정지(루프
+  중에만 — `stop_hook_active` 게이트). 기본 미설치, 런타임 on/off=`coach guard on/off`. 정책은 `coach`
+  (usage-coach, codexbar 의존)가 갖고 미설치·조회실패는 fail-open(작업 안 죽임).
+
 ## [1.1.0] - 2026-06-10
 
 카파시(Karpathy) 4원칙을 층별로 도입. 기존 규칙과 충돌 없음(보강).
