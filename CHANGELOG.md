@@ -11,7 +11,7 @@
 - **opt-in goal 요금가드(`--with-guard`)** — `/goal` 자율 루프가 주간 사용량 한도에 닿으면 자동
   정지하는 벤더중립 안전장치. 기본 미설치. **정책=`coach`(usage-coach, codexbar 의존) 단일정본,
   하네스=배선만**. flavor별 주입: claude=`.claude/settings.json` Stop훅(`coach --hook`, inline
-  `command -v coach … || true` fail-open), codex=`_shared/guard/` 워처(`codex app-server proxy`→
+  `command -v coach … || true` fail-open), codex=`_shared/guard/` 워처(loopback WebSocket `ws://127.0.0.1:47931`→
   `thread/loaded/list`→`thread/goal/clear`). antigravity는 `/goal` 자율 루프 부재로 미지원(다음 버전).
   런타임 on/off=`coach guard on/off/status`. 미설치·플래그 off·조회실패는 모두 fail-open. generator
   결정성 불변(init.py 고정 정본 복사·병합만, knot `--with-knot`과 동형). `configure-multiagent` SKILL에
