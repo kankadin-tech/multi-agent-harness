@@ -99,3 +99,16 @@
 **교훈**: 영상 주제선정 중 두 번 "내 추론·2차 요약"이 틀릴 뻔함 → 둘 다 1차 출처로 잡음. ① **컷오프 이후 기능(`/goal`·Stop hook)은 공식 문서로 확인.** 메모리·노트북 요약으로 단정하니 "평가자 무조건 Haiku"(→설정가능)·"이미지 못 봄"(→문서에 없는 추론) 같은 과장이 나옴. 사용자가 "문서로 다 확인된거?"로 압박 → 재fetch해 정정. ② **경쟁 영상 주장은 yt-dlp로 자막 받아 직접 정독 > NotebookLM 요약(2차).** 세션1 노트북이 "개발동생=Loop Engineering 점유"라 기록했으나, 채널 직접 확인하니 그 제목은 Austin Marchese(해외)였고 개발동생 실제 영상은 다른 것. 자막 정독으로 경쟁 지형·인용문까지 정확히 확보.
 **근거**: WebFetch(code.claude.com/docs/en/goal) 원문 인용으로 평가자 사실 3건 정정. yt-dlp 자막 정독으로 Berman(F4a8aMLb678)·개발동생(QI1FNnUfiZg) 메커니즘·요금 미점유 직접 확인. 추론→문서/1차 전환 후 차별화 근거가 "추론"에서 "문서·실측"으로 단단해짐.
 **worker**: orchestrator(WebFetch·yt-dlp 자막·헤드리스 claude -p /goal 실측)
+
+## [2026-07-03] 워커 코드 산출물은 JSONL에서 추출·검증 (subway-runner-game)
+**교훈**: claude-main worker가 큰 코드(HTML 700+줄)를 텍스트로 반환할 때, 응답 본문에 **정체불명 오타 토큰**이 섞일 수 있다(실측: `background: ...#ffb game 300...`, `color: 0xffc górze` — 둘 다 로드 깨짐). 워커가 Issues에 정직하게 자기신고했다(brief의 "불확실·불일치는 result에 표면화" 규약 작동). 대응 원칙: ① 700줄을 **손으로 옮기지 말 것**(전사 중 오타 재유입). agent output JSONL(`tasks/<id>.output`)에서 python으로 assistant text→코드블록 추출→`html.unescape`(필요시)→치환 수정→파일 저장. 컨텍스트에 덤프 안 함(오버플로 방지). ② 저장 전 **기계 검증**: 알려진 garbage 토큰 부재 assert + `{}`/`()` 균형 + 기대 기능 키워드 grep + `node --check`. ③ 재호출(반영 라운드) 산출물도 같은 파이프라인 — 2차엔 오타 0이었으나 검증은 매번. 
+**imagegen 교훈**: codex imagegen의 "seamless/tileable"은 신뢰 불가 — gemini 검수가 track.png 경계 불연속(크랙·얼룩 패턴)을 잡음. 대응: 큰 랜드마크 얼룩 대신 **균질 미세패턴**으로 재생성 요청 + 인엔진 완화(중앙 주행레인은 다크 스트립 오버레이가 덮어 텍스처 이음매를 가림). 완벽 seamless가 필요하면 imagegen 단독으론 부족.
+**검증 환경 교훈**: Playwright MCP는 `file://` 차단 → `python3 -m http.server`로 서빙 후 `http://localhost`. macOS엔 `timeout` 없음(gtimeout 또는 그냥 bg). 게임류 검증은 스크린샷 + `browser_evaluate`로 상태(점수 라이브 증가·게임오버·grace 생존)를 **프로그램적으로 단언** — 스크린샷만으론 로직 미검증.
+**worker**: codex-main(imagegen×2)·claude-main(구현+반영)·codex-critic(리뷰)·gemini(이미지 검수). Producer→Reviewer→반영→재검증 파이프라인 완주.
+**검증 false-pass 교훈(중요)**: 위 Playwright http 검증은 텍스처가 "적용됨"으로 PASS를 냈으나, 사용자는 `file://`(더블클릭)로 열어 **전부 단색 폴백**이었다. WebGL은 `file://`에서 로컬 이미지를 텍스처로 로드하는 걸 CORS로 차단하는데, http 서빙은 이를 우회하므로 **검증 환경(http)이 실제 사용 환경(file://)과 달라 결함을 못 잡았다.** 원칙: ① "단일 HTML" 산출물은 **실제 배포/사용 방식으로 검증**하라(더블클릭이면 file://). ② 진짜 자체완결 단일 파일이 목표면 에셋을 **base64 data URI로 임베드**(프로토콜 독립·CORS 무관·오프라인 동작). 외부 `assets/*.png` 참조는 http 서버 전제라 "단일 파일"의 이점을 깬다. 폴백 색상 로직은 결함을 조용히 감춰 오진을 키운다 — 폴백이 있어도 "의도한 에셋이 실제로 떴는지"를 별도 단언하라.
+
+## agy(gemini worker) 헤드리스 호출 — CLI 버전업으로 플래그 조용히 사망 (2026-07-03, 심판 세션 정정)
+- **근본 원인**: agy 1.0.16에서 `-p` 단축 플래그가 **제거**됨(1.0.13엔 있었음). 미인식 플래그라 프롬프트가 조용히 무시 → 온보딩 인사만 반환, 모델 호출 0·사용량 0. 디스패처 정본(backends.json)도 `-p`라서 같이 죽어 있었음 → `--prompt`로 교정(2026-07-03).
+- **오진 정정**: 당시 세션이 "등호(`--prompt=`) 필수"로 기록했으나 실측상 **공백형 `--prompt "..."`도 정상**(등호/공백 무관, `-p`가 죽은 것). 또한 `--dangerously-skip-permissions`·`--add-dir` 권장은 **routing.md 금지 사항**(auto-mode classifier 차단·stdin hang 원인) — 손 호출 말고 `call_worker.sh gemini <brief>` 정본 경로를 쓸 것.
+- **일반 교훈**: 외부 CLI 백엔드는 버전업으로 플래그가 소리 없이 부러진다. ① 증상="응답은 오는데 내용 무관/사용량 0"이면 프롬프트 미전달 의심 → `--help`에서 플래그 존재부터 확인. ② 워커 백엔드 이상 시 스모크는 정본 경로(`call_worker.sh`)로 1회 — 손 호출로 우회 진단하면 정본이 죽은 걸 놓친다.
+- `-i`(interactive)는 /dev/tty 필요 → 헤드리스 불가. 모델명은 `agy models`의 정확한 라벨.

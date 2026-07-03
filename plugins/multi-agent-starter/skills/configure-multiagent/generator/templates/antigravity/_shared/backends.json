@@ -10,7 +10,7 @@
       "brief_mode": "content",
       "cli": {
         "command": "claude",
-        "args_template": ["-p", "@brief_content"],
+        "args_template": ["--prompt", "@brief_content"],
         "non_interactive": { "stdin": "/dev/null", "no_tty": true, "on_permission_prompt": "fail" }
       },
       "cwd_policy": "repo_root",

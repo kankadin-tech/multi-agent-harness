@@ -2,6 +2,13 @@
 
 이 파일은 multi-agent-starter (Antigravity flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.2.1] - 2026-07-03
+
+### Fixed
+- **gemini(agy) 워커 프롬프트 미전달 수정** — Antigravity CLI 1.0.16에서 `-p` 단축 플래그가
+  제거되어 backends.json의 `args_template: ["-p", …]`가 프롬프트를 조용히 무시(모델 미호출·사용량 0).
+  `["--prompt", …]`로 교정. 증상: gemini 워커가 온보딩 인사만 반환.
+
 ## [0.2.0] - 2026-06-10
 
 카파시(Karpathy) 4원칙을 층별로 도입. 기존 규칙과 충돌 없음(보강).

@@ -5,6 +5,16 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.2.1] - 2026-07-03
+
+### Fixed
+- **gemini(agy) 워커 프롬프트 미전달** — Antigravity CLI 1.0.16에서 `-p` 단축 플래그 제거로
+  backends.json `args_template`의 프롬프트가 조용히 무시되던 문제(모델 미호출·사용량 0).
+  템플릿 3종(claude 1.2.1 / codex 0.3.1 / antigravity 0.2.1) 전부 `--prompt`로 교정.
+  기존 설치자는 `_shared/backends.json`의 `"-p"`를 `"--prompt"`로 한 줄 수정하면 된다.
+- task.md 작성 규칙 명문화(CLAUDE.md) — `## 메타` yaml 펜스 형식 강제(frontmatter 금지),
+  mat 모니터 파싱 정본과 일치.
+
 ## [2.2.0] - 2026-06-28
 
 ### Added
