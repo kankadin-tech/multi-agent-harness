@@ -2,6 +2,17 @@
 
 이 파일은 multi-agent-starter (Codex flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.3.2] - 2026-07-04
+
+### Fixed
+- **gemini 워커 폴백 실패 사유 유실** — 디스패처(`call_worker.sh`)가 api 폴백의 필수 env
+  (`GEMINI_API_KEY`) 부재 시 실패 사유 없이 죽던 문제를 에러 envelope 반환으로 수정,
+  호출 시작 시 폴백 불가 사전 경고 추가.
+
+### Changed
+- routing.md gemini — 소스·다중파일 검토 인라인 필수(agy 헤드리스 300s 타임아웃 실측),
+  폴백 조건(`GEMINI_API_KEY`) 명문화, 시간 제한 작업 전 경량 스모크 권장.
+
 ## [0.3.1] - 2026-07-03
 
 ### Fixed

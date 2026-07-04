@@ -112,3 +112,11 @@
 - **오진 정정**: 당시 세션이 "등호(`--prompt=`) 필수"로 기록했으나 실측상 **공백형 `--prompt "..."`도 정상**(등호/공백 무관, `-p`가 죽은 것). 또한 `--dangerously-skip-permissions`·`--add-dir` 권장은 **routing.md 금지 사항**(auto-mode classifier 차단·stdin hang 원인) — 손 호출 말고 `call_worker.sh gemini <brief>` 정본 경로를 쓸 것.
 - **일반 교훈**: 외부 CLI 백엔드는 버전업으로 플래그가 소리 없이 부러진다. ① 증상="응답은 오는데 내용 무관/사용량 0"이면 프롬프트 미전달 의심 → `--help`에서 플래그 존재부터 확인. ② 워커 백엔드 이상 시 스모크는 정본 경로(`call_worker.sh`)로 1회 — 손 호출로 우회 진단하면 정본이 죽은 걸 놓친다.
 - `-i`(interactive)는 /dev/tty 필요 → 헤드리스 불가. 모델명은 `agy models`의 정확한 라벨.
+
+## gemini(agy) 워커 — 다중파일 헤드리스 순회 타임아웃 + API 폴백 키 부재 (2026-07-04, dayjs-bughunt)
+- **증상**: gemini worker에 "디렉토리 절대경로 + 파일 10개 정독" brief를 주자 agy CLI가 **300s 타임아웃**(exit 124, envelope status=timeout). 이어 api 폴백도 `필수 env 없음: GEMINI_API_KEY`로 즉사 → **gemini worker 전체 불가**. (2026-07-03 `-p` 플래그 이슈와 별개 — 이번엔 `--prompt` 정본이라 온보딩이 아니라 순수 타임아웃.)
+- **진단**: agy는 `cwd_policy: isolated_tmp`에서 돌며 brief 본문의 절대경로 파일을 연다. 이미지/PDF 1건(≈26s)은 정상이지만, **소스 디렉토리 순회 + 다수 파일 열람은 300s 안에 못 끝냄**(헤드리스 auto-mode에서 파일 다수 접근이 느림/행).
+- **효과 있던 우회(정본화 권장)**: brief를 **자체 완결형**으로 재작성 — 관련 코드 스니펫을 brief 본문에 **인라인**하고 "파일 열지 말 것" 명시 → **27s exit 0, 정상 판정 반환.** 즉 gemini에 발굴·리뷰를 시킬 땐 **디렉토리를 가리키지 말고 필요한 소스를 orchestrator가 inline**하라(FS-미접근 모델 원칙 [gemini FS 미접근]과 동일 선상).
+- **고쳐야 할 것(harness)**: ① `GEMINI_API_KEY` 미설정 시 agy 타임아웃 → 폴백까지 동반 실패로 **gemini 완전 상실**. 키를 설정하거나, 폴백 부재를 조기 감지해 orchestrator에 경고. ② gemini 다중파일 작업은 backends.json timeout(300) 상향 또는 청크·인라인 강제. ③ 시간 제한 대결에선 **의존 전에 경량 스모크 1회**로 가용성 확인(안 그러면 발굴 단계에서 통째로 날림).
+- **대결 영향(공정성 메모)**: 이번 seg2-bughunt B측(하네스)은 gemini를 **발굴에 못 쓰고 후반 리뷰 1패스만** 사용 — 3모델 균등 대비 핸디캡. A측(fable5-solo)과의 자원·성능 비교 해석 시 이 제약을 반영하고, **재실험 전 위 ①~③ 수정 권장.**
+**worker**: orchestrator(agy 타임아웃 진단·자체완결 brief 우회·교차검증)

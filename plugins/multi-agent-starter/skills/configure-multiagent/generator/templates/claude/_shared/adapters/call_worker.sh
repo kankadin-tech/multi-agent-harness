@@ -44,6 +44,12 @@ BRIEF="$(cd "$(dirname -- "$BRIEF")" && pwd)/$(basename -- "$BRIEF")"
 rec="$(jq -c --arg r "$ROLE" '.workers[$r] // empty' "$BACKENDS")"
 [ -n "$rec" ] || die "role 미정의: $ROLE" 2
 
+# 폴백 가용성 사전 점검(경고만): primary가 죽고 나서야 폴백 불가를 아는 것을 방지
+while IFS= read -r _fe; do
+  [ -n "$_fe" ] && [ -z "${!_fe:-}" ] && \
+    echo "call_worker: 경고 — 폴백 필수 env 미설정: $_fe (primary 실패 시 폴백 불가)" >&2
+done < <(jq -r '.fallbacks[]?.api.required_env[]? // empty' <<<"$rec")
+
 redact() { sed -E 's/[A-Za-z0-9_-]{32,}/[REDACTED]/g'; }
 
 # 단일 backend 실행 → envelope(JSON)을 stdout, exit code 반환
@@ -101,7 +107,13 @@ run_backend() {
     [ -f "$ROOT/_shared/$ref" ] || die "api 스크립트 없음: $ref" 4
     while IFS= read -r reqenv; do
       [ -n "$reqenv" ] || continue
-      [ -n "${!reqenv:-}" ] || die "필수 env 없음: $reqenv" 4
+      if [ -z "${!reqenv:-}" ]; then
+        # die 대신 에러 envelope 반환: 폴백 체인에서 실패 사유가 최종 envelope에 남도록
+        jq -n --arg model "$model" --arg e "$reqenv" \
+          '{status:"error", exit_code:4, backend:"api", model:$model,
+            duration_s:0, stdout:"", stderr_sanitized:("필수 env 없음: " + $e + " — 폴백 사용 불가")}'
+        return 4
+      fi
     done < <(jq -r '.api.required_env[]? // empty' <<<"$spec")
     brief_pass="$(jq -r '.api.brief_pass // "arg1"' <<<"$spec")"
     cmd+=("bash" "$ROOT/_shared/$ref")

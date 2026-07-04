@@ -5,6 +5,20 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.2.2] - 2026-07-04
+
+### Fixed
+- **gemini 워커 폴백 실패 사유 유실** — `call_worker.sh`가 api 폴백의 필수 env
+  (`GEMINI_API_KEY`) 부재 시 `die`로 죽어 실패 사유가 최종 envelope에 남지 않던 문제.
+  에러 envelope(`stderr_sanitized`)로 반환하도록 수정 + 호출 시작 시 폴백 불가 사전 경고 추가.
+  템플릿 3종(claude 1.2.2 / codex 0.3.2 / antigravity 0.2.2) 동일 반영.
+  기존 설치자는 `_shared/adapters/call_worker.sh`를 새 버전으로 교체하면 된다.
+
+### Changed
+- **routing.md gemini 규칙 보강**(claude/codex flavor) — 소스·다중파일 검토는 brief에
+  스니펫 **인라인 필수**(디렉토리 순회 시 agy 헤드리스 300s 타임아웃 실측), 폴백 조건
+  (`GEMINI_API_KEY`) 명문화, 시간 제한 작업 전 경량 스모크 권장.
+
 ## [2.2.1] - 2026-07-03
 
 ### Fixed
