@@ -5,6 +5,14 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.3.0] - 2026-07-04
+
+### Added
+- **`/export` 스킬** — 하네스 task 산출물을 볼트로 보내는 확정 트리거. `export_to_vault.sh`의
+  얇은 shim(게이트: MULTIAGENT_ROOT/상향 탐색, 대상: done task 자동 판별, --all/--dry-run/
+  --media copy/--domain 패스스루, 성공 시 log.md [DECISION] 기록). 로직 정본은 스크립트·
+  vault-bridge.md 유지 — 스킬은 재구현하지 않음.
+
 ## [2.2.3] - 2026-07-04
 
 ### Fixed
