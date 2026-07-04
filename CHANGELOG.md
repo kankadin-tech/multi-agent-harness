@@ -5,6 +5,14 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.2.3] - 2026-07-04
+
+### Fixed
+- **KI-1 종결** — `worker-brief.md` 템플릿 첫 의미 줄을 한 줄 목적 평문으로 재구성 (mat 모니터 워커 목적 표시 오염 수정). root + 템플릿 3종(claude 1.2.3 / codex 0.3.3 / antigravity 0.2.3) 동일 반영. 기존 설치자는 `init.py` update 재실행으로 반영.
+
+### Added
+- **KI-4 등록** — `init.py` update 모드의 `_shared/learnings.md` 로컬 누적분 덮어쓰기 문제 문서화 (완화: `_local/learnings.md` 병행 기록).
+
 ## [2.2.2] - 2026-07-04
 
 ### Fixed
