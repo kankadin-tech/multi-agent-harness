@@ -2,6 +2,19 @@
 
 이 파일은 multi-agent-starter (Codex flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.4.2] - 2026-07-05
+
+### Added
+- **볼트 브리지 정식 편입** — 하네스 task 산출물을 knot 계열 LLM Wiki 볼트 inbox로 단방향
+  export하는 브리지를 generator 정식 배포로 편입. `_shared/adapters/export_to_vault.sh`
+  (실행권한 유지)·`_shared/vault-bridge.md`·`_shared/vault.config`가 이제 모든 설치에
+  배포된다(볼트 열기 힌트는 `cd <vault> && codex`). `--domain <d>` 하나로 목적지 폴더·
+  frontmatter를 함께 유도. 결정 기록: 이 flavor D9.
+
+### Changed
+- `_shared/vault.config`는 **scaffold-once 보존**(사용자 설정 — update가 덮어쓰지 않음).
+- 볼트 경로 우선순위: `--vault > $KNOT_VAULT > vault.config(vault=) > $HOME/vaults/knot`.
+
 ## [0.4.1] - 2026-07-05
 
 ### Changed

@@ -3,6 +3,21 @@
 이 파일은 MultiAgent orchestration 시스템의 주요 변경을 기록한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [1.3.2] - 2026-07-05
+
+### Added
+- **볼트 브리지 정식 편입** — 하네스 task 산출물을 knot 계열 LLM Wiki 볼트 inbox로 단방향
+  export하는 브리지를 generator 정식 배포로 편입. `_shared/adapters/export_to_vault.sh`
+  (실행권한 유지)·`_shared/vault-bridge.md`(문서)·`_shared/vault.config`(사용자 설정)가
+  이제 모든 설치에 배포된다. 볼트는 무수정 — inbox capture 파일만 떨구고 분류/분석/연결은
+  볼트가 `/inbox`→`/ingest`로 독립 수행.
+- `--domain <d>` 하나로 목적지 폴더·frontmatter를 함께 유도(폴더↔frontmatter 일치 보장).
+
+### Changed
+- `_shared/vault.config`는 **scaffold-once 보존** — 볼트 경로·기본 도메인 같은 사용자
+  설정이라 update 재생성이 덮어쓰지 않는다(있으면 보존, 신규 설치만 제네릭 스캐폴드 기록).
+- 볼트 경로 우선순위: `--vault > $KNOT_VAULT > vault.config(vault=) > $HOME/vaults/knot`.
+
 ## [1.3.1] - 2026-07-05
 
 ### Changed
