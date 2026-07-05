@@ -5,6 +5,28 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.4.2] - 2026-07-05
+
+### Added
+- **볼트 브리지 정식 편입** — 하네스 task 산출물을 knot 계열 LLM Wiki 볼트 inbox로 단방향
+  export하는 브리지 3개 파일을 generator 정식 배포로 편입해 **3 flavor(claude·codex·antigravity)
+  전부**에 배포한다(이전엔 로컬 설치본 orphan, git 미커밋):
+  - `_shared/adapters/export_to_vault.sh` (실행권한 100755 유지) — 볼트 열기 힌트만 flavor별
+    분기(claude/codex/agy), 그 외 로직 동일.
+  - `_shared/vault-bridge.md` (문서), `_shared/vault.config` (사용자 설정, 제네릭 스캐폴드).
+  - **domain 단일 플래그 유도** — `--domain <d>` 하나로 목적지 폴더·frontmatter를 함께
+    맞춘다(폴더↔frontmatter 일치 보장). 기본은 `_misc`(볼트 `/inbox`가 도메인 판정).
+- **validate C1 가드** — 브리지 3파일을 required 목록에 추가(설치 후 셋 다 존재 보장, 3 flavor).
+
+### Changed
+- **`_shared/vault.config` scaffold-once 보존** — 볼트 경로·기본 도메인 같은 사용자 설정이라
+  generator update가 덮어쓰지 않는다(init.py `PRESERVE_IF_EXISTS`; 있으면 보존, 신규 설치만
+  제네릭 스캐폴드 기록). dry-run·update 모드 모두 올바르게 동작(테스트: test_update_preserve.py).
+- **개인 기본경로 일반화** — 스크립트 `DEFAULT_VAULT`를 `$HOME/vaults/knot`로(개인값 제거).
+  볼트 경로 우선순위 `--vault > $KNOT_VAULT > vault.config(vault=) > $HOME/vaults/knot`.
+- 결정 기록: 루트 D9 근거 갱신(볼트 브리지 편입·scaffold-once·경로 일반화), codex·antigravity
+  flavor 신규 D9.
+
 ## [2.4.1] - 2026-07-05
 
 ### Changed
