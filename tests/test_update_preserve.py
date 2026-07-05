@@ -38,6 +38,10 @@ def main() -> None:
         ul.mkdir(parents=True, exist_ok=True)
         (ul / "learnings.md").write_text("LOCAL", encoding="utf-8")
 
+        # scaffold-once 사용자 설정 심기(update가 보존해야 — 덮어쓰면 안 됨)
+        vcfg = tgt / "_shared" / "vault.config"
+        vcfg.write_text("vault=~/my/custom/vault\ndomain=my-domain\n", encoding="utf-8")
+
         # 시스템 파일 변조(update가 되돌리는지)
         (tgt / "_shared" / "routing.md").write_text("STALE", encoding="utf-8")
 
@@ -50,6 +54,8 @@ def main() -> None:
              (ut / "task.md").read_text(encoding="utf-8") == "USER DATA"),
             ("_local/learnings.md 보존",
              (ul / "learnings.md").read_text(encoding="utf-8") == "LOCAL"),
+            ("_shared/vault.config scaffold-once 보존(사용자 설정 무손상)",
+             vcfg.read_text(encoding="utf-8") == "vault=~/my/custom/vault\ndomain=my-domain\n"),
             ("_shared/routing.md 갱신",
              (tgt / "_shared" / "routing.md").read_text(encoding="utf-8") != "STALE"),
         ]
