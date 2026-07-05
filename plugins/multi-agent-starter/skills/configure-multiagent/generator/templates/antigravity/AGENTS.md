@@ -135,6 +135,7 @@ If `context.md` exceeds the limit, append history to `log.md`, then keep only th
 - Antigravity Orchestrator internal reasoning does not require approval.
 - External paid model tools still require explicit user approval even if the task is already created.
 - Per-task worker call budget: `max_worker_calls` in `task.md` (default 6). Confirm with the user before exceeding (details: `_shared/approval-policy.md`).
+- Host-native subagent/task tools (e.g. Claude Code's Agent tool): read-only exploration only (codebase understanding, search) without approval. Any delegation that produces artifacts must go through the worker pool (subject to approval) — routing it through a subagent leaves the brief/result record and audit log empty, so it is forbidden.
 
 ## Verification
 
