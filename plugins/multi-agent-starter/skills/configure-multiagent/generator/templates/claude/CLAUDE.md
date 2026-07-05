@@ -122,6 +122,7 @@ wc -w tasks/<task>/context.md   # 영문 단어수
 - 작업당 첫 호출 전 사용자에게 확인 후 `task.md` 업데이트
 - 예외: Orchestrator의 내부 추론은 worker 호출이 아니므로 승인 불필요
 - 작업당 worker 호출 예산: `task.md`의 `max_worker_calls` (기본 6). 초과 전 사용자 확인 (상세: `_shared/approval-policy.md`)
+- 호스트 네이티브 서브에이전트(Claude Code의 Agent 도구 등)는 **read-only 탐색**(코드베이스 파악·검색)만 무승인 허용. 산출물을 만드는 위임은 반드시 워커 풀 경유(승인 대상) — 서브에이전트로 우회하면 brief·result 기록과 감사 로그가 비므로 금지.
 
 ## Verification (결과물 수락 전 필수)
 

@@ -33,6 +33,7 @@
 - `task.md` 메타의 `max_worker_calls`(기본 6)는 이 작업의 worker 호출 총 예산이다.
 - 예산 초과가 예상되는 호출 전에 사용자 확인을 받는다. 승인 시 `task.md`의 값을 상향하고 `log.md`에 `[DECISION]`으로 기록한다.
 - 자동 재시도(orchestrator-rules §3의 1회 재시도)도 예산에 포함된다. 하드 중단이 아니라 확인 게이트다 — 기존 승인 게이트(HITL)를 대체하지 않는다.
+- **Confirm the budget at batch-approval time**: when workers are approved as a batch, set `max_worker_calls` in the same approval, sized to the expected call count for `planned_workers` plus a retry margin. The soft gate then fires only on runaway beyond the plan and does not interrupt the user during normal progress.
 
 ## 비용·쿼터 가이드라인
 
