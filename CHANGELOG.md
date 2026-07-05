@@ -5,6 +5,18 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.4.1] - 2026-07-05
+
+### Changed
+- **전역 Advisor 규칙 ↔ 하네스 인터페이스 정합** (문서 규칙 2줄 + 결정 기록):
+  - **승인 시 예산 확정** — 워커 일괄 승인 시 `planned_workers` 기준 예상 호출 수 +
+    재시도 여유분으로 `max_worker_calls`를 함께 확정. soft gate가 계획을 벗어난 폭주에만
+    발동해 자동 진행 선호와 양립 (approval-policy "호출 예산" 섹션, 3 flavor).
+  - **서브에이전트 read-only 한정** — 호스트 네이티브 서브에이전트(Claude Code의 Agent 도구
+    등)는 read-only 탐색만 무승인 허용. 산출물 위임은 반드시 워커 풀 경유 — 서브에이전트로
+    우회하면 brief·result·감사 로그가 비므로 금지 (지침파일 Approval Gate, 3 flavor).
+  - 결정 기록: 루트 D11 (f)(g) 근거 갱신, codex·antigravity flavor D8 (e)(f) 상당.
+
 ## [2.4.0] - 2026-07-05
 
 ### Added

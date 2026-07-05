@@ -3,6 +3,16 @@
 이 파일은 MultiAgent orchestration 시스템의 주요 변경을 기록한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [1.3.1] - 2026-07-05
+
+### Changed
+- **승인 시 예산 확정** — 워커 일괄 승인 시 `planned_workers` 기준 예상 호출 수 + 재시도
+  여유분으로 `max_worker_calls`를 함께 확정. soft gate가 계획을 벗어난 폭주에만 발동
+  (approval-policy "호출 예산" 섹션).
+- **서브에이전트 read-only 한정** — 호스트 네이티브 서브에이전트(Claude Code의 Agent 도구
+  등)는 read-only 탐색만 무승인 허용. 산출물 위임은 반드시 워커 풀 경유 — 우회 시 brief·
+  result·감사 로그가 비므로 금지 (CLAUDE.md Approval Gate). (D11 (f)(g))
+
 ## [1.3.0] - 2026-07-05
 
 ### Added
