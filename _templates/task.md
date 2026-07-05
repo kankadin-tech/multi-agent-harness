@@ -13,6 +13,7 @@ status: pending
 created: <YYYY-MM-DD>
 updated: <YYYY-MM-DD>
 priority: medium  # high | medium | low
+max_worker_calls: 6  # 이 작업의 worker 호출 총 예산(soft gate). 초과 전 사용자 확인 필요
 ```
 
 ## Goal
