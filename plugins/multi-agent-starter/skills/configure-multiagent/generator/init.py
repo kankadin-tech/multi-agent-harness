@@ -26,6 +26,9 @@ TEMPLATES_DIR = SCRIPT_DIR / "templates"
 FLAVORS = ("claude", "codex", "antigravity")
 # 사용자 데이터 디렉토리 — 내용물은 절대 덮어쓰거나 지우지 않는다(.gitkeep만 보장).
 PRESERVE_DIRS = ("tasks", "_local")
+# scaffold-once 파일 — 신규 설치엔 정본을 깔되, 이미 있으면 사용자 설정이므로 보존(덮어쓰지 않음).
+# 볼트 브리지 vault.config 는 볼트 경로·기본 도메인 같은 사용자 설정이라 update가 지우면 안 된다.
+PRESERVE_IF_EXISTS = ("_shared/vault.config",)
 
 # flavor별 지침파일(에이전트가 자동 로드) — validate.py FLAVOR['instruction']과 일치해야.
 INSTRUCTION_FILE = {"claude": "CLAUDE.md", "codex": "AGENTS.md", "antigravity": "AGENTS.md"}
@@ -82,10 +85,12 @@ def is_user_data(rel: Path) -> bool:
     return len(rel.parts) >= 1 and rel.parts[0] in PRESERVE_DIRS and rel.name != ".gitkeep"
 
 
-def copy_template(template_dir: Path, target: Path, dry: bool) -> list[Path]:
+def copy_template(template_dir: Path, target: Path, dry: bool) -> tuple[list[Path], list[Path]]:
     """템플릿 파일을 target에 복사. target-only 파일(사용자 tasks/ 작업물)은
-    삭제하지 않으므로 update 모드에서 자동 보존된다."""
+    삭제하지 않으므로 update 모드에서 자동 보존된다.
+    (written, preserved) 반환 — preserved는 이미 존재해 건너뛴 scaffold-once 사용자 설정."""
     written: list[Path] = []
+    preserved: list[Path] = []
     for src in sorted(template_dir.rglob("*")):
         if src.is_dir():
             continue
@@ -93,11 +98,15 @@ def copy_template(template_dir: Path, target: Path, dry: bool) -> list[Path]:
         if is_user_data(rel):  # 방어적: 템플릿엔 .gitkeep만 있어 보통 도달 안 함
             continue
         dest = target / rel
+        # scaffold-once: 사용자 설정 파일이 이미 있으면 보존(update가 덮어쓰지 않음). 신규면 정본 기록.
+        if rel.as_posix() in PRESERVE_IF_EXISTS and dest.exists():
+            preserved.append(rel)
+            continue
         if not dry:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dest)
         written.append(rel)
-    return written
+    return written, preserved
 
 
 def inject_knot(target: Path, flavor: str, dry: bool) -> str:
@@ -197,9 +206,12 @@ def main() -> None:
         if input("\n진행할까요? [y/N]: ").strip().lower() not in ("y", "yes"):
             sys.exit("취소됨")
 
-    written = copy_template(template_dir, target, dry=args.dry_run)
+    written, preserved = copy_template(template_dir, target, dry=args.dry_run)
     prefix = "(dry) " if args.dry_run else ""
     print(f"\n  {prefix}{len(written)}개 파일 {'복사 예정' if args.dry_run else '복사 완료'}.")
+    if preserved:
+        names = ", ".join(p.as_posix() for p in preserved)
+        print(f"  {prefix}{len(preserved)}개 사용자 설정 보존(scaffold-once, 덮어쓰지 않음): {names}")
 
     if args.with_knot:
         print(f"  {prefix}{inject_knot(target, flavor, dry=args.dry_run)}")

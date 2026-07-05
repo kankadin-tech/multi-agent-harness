@@ -133,6 +133,8 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
         "_shared/routing.md", "_shared/orchestrator-rules.md",
         "_shared/design-basis.md", "_shared/system-invariants.md",
         "_shared/check-invariants.sh",
+        # 볼트 브리지(D9) — generator가 3 flavor 전부에 배포 보장. vault.config는 scaffold-once.
+        "_shared/adapters/export_to_vault.sh", "_shared/vault-bridge.md", "_shared/vault.config",
         "_templates/log.md", "_templates/context.md", "_templates/worker-brief.md",
     ] + cfg["extra_files"]
     missing = [r for r in required if not (target / r).is_file()]
