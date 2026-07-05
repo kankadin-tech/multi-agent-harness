@@ -123,11 +123,13 @@ def diff_report(expected: dict[str, bytes], current: dict[str, bytes]) -> list[s
 
 
 def write_template(expected: dict[str, bytes], current: dict[str, bytes]) -> None:
-    # 1) 갱신/추가
+    # 1) 갱신/추가 (+ 루트 파일의 실행권한 비트 보존 — check-invariants.sh 등)
     for rel, data in expected.items():
         dest = TEMPLATE_DIR / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(data)
+        if (REPO_ROOT / rel).stat().st_mode & 0o111:
+            dest.chmod(dest.stat().st_mode | 0o111)
     # 2) 루트에서 사라진 파일은 템플릿에서도 제거(진짜 재생성)
     for rel in current:
         if rel not in expected:
