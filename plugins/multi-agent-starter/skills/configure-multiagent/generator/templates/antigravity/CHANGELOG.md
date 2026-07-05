@@ -2,6 +2,17 @@
 
 이 파일은 multi-agent-starter (Antigravity flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.3.1] - 2026-07-05
+
+### Changed
+- **Confirm the budget at batch-approval time** — set `max_worker_calls` in the same batch
+  approval, sized to `planned_workers` plus a retry margin; the soft gate then fires only on
+  runaway beyond the plan (approval-policy call-budget section).
+- **Host-native subagents are read-only** — host-native subagent/task tools (e.g. Claude
+  Code's Agent tool) may do read-only exploration without approval; any artifact-producing
+  delegation must go through the worker pool, since bypassing it leaves brief/result and audit
+  log empty (AGENTS.md Approval Gate). (D8 (e)(f))
+
 ## [0.3.0] - 2026-07-05
 
 ### Added
