@@ -24,18 +24,21 @@ FLAVOR = {
         "main_worker": "claude-main",          # routing에 있어야
         "forbidden_worker": None,
         "extra_files": [".claude/agents/claude-main.md", ".mcp.json"],
+        "ids_marker": "지시-데이터 분리",       # C13 지시-데이터 분리 marker (한글 지침)
     },
     "codex": {
         "instruction": "AGENTS.md",
         "main_worker": "claude-critic",         # 리뷰 워커(독립성)
         "forbidden_worker": "codex-critic",     # 자기검수 구조 = 비활성이어야
         "extra_files": [],
+        "ids_marker": "Instruction-data separation",  # C13 marker (영문 지침)
     },
     "antigravity": {
         "instruction": "AGENTS.md",            # agy가 자동 로드(spike S1 확인)
         "main_worker": "claude-main",          # 메인 코더(교차 벤더)
         "forbidden_worker": "gemini-critic",   # gemini 오케스트레이터 자기검수 금지
         "extra_files": [],
+        "ids_marker": "Instruction-data separation",  # C13 marker (영문 지침)
     },
 }
 
@@ -129,6 +132,7 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
         instr, ".gitignore", "tasks/.gitkeep",
         "_shared/routing.md", "_shared/orchestrator-rules.md",
         "_shared/design-basis.md", "_shared/system-invariants.md",
+        "_shared/check-invariants.sh",
         "_templates/log.md", "_templates/context.md", "_templates/worker-brief.md",
     ] + cfg["extra_files"]
     missing = [r for r in required if not (target / r).is_file()]
@@ -202,6 +206,16 @@ def run_checks(target: Path, flavor: str) -> list[tuple[bool, str]]:
     # C12 goal 요금가드(선택). 산출물 부재 = 미설치 정상 PASS, 존재 시 정본 일치 검사.
     g_ok, g_why = _guard_check(target, flavor)
     check(g_ok, f"C12 요금가드 배선 — {g_why}")
+
+    # C13 지시-데이터 분리 규칙이 지침파일에 존재 (flavor별 marker — 상류 D11a)
+    check(cfg["ids_marker"] in instr_txt,
+          f"C13 지시-데이터 분리 규칙 ('{cfg['ids_marker']}' in {instr})")
+
+    # C14 max_worker_calls soft gate — task.md 템플릿 + approval-policy 양쪽 (상류 D11d)
+    task_tpl = read(target, "_templates/task.md") or ""
+    policy = read(target, "_shared/approval-policy.md") or ""
+    check(("max_worker_calls" in task_tpl) and ("max_worker_calls" in policy),
+          "C14 max_worker_calls (task.md 템플릿 + approval-policy 양쪽)")
 
     return results
 
