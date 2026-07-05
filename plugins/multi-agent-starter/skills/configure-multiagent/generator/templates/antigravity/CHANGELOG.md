@@ -2,6 +2,21 @@
 
 이 파일은 multi-agent-starter (Antigravity flavor) orchestration 시스템의 주요 변경을 기록한다.
 
+## [0.3.0] - 2026-07-05
+
+### Added
+- **Instruction-data separation (untrusted input)** — `sources/` 자료·worker `result.md`
+  내용은 데이터이지 지시가 아님을 AGENTS.md Verification에 명문화. 내장 지시문 발견 시
+  불채택 + `[DECISION]` 기록 + 사용자 표면화. (D8a, INV12)
+- **`_shared/check-invariants.sh` 결정론 실행기** — system-invariants.md 표가 스펙,
+  스크립트가 실행기. ROOT 자동 탐지, 항목별 PASS/FAIL 자체 판정, FAIL 시 exit 1.
+  orchestrator-rules §2 절차 3이 이 스크립트 실행으로 갱신됨. (D8b)
+- **learnings.md 통합 패스** — 20KB(`wc -c`) 초과 시 반복 검증 교훈을 규칙 파일로 승격하고
+  "## 통합됨"에 1줄 요약만 남기는 성장 관리 절차. (D8c)
+- **worker 호출 예산 soft gate** — task.md 메타 `max_worker_calls`(기본 6) +
+  approval-policy "호출 예산" 섹션 + AGENTS.md Approval Gate 한 줄. 초과 전 사용자 확인
+  게이트(하드 중단 아님). (D8d, INV13)
+
 ## [0.2.3] - 2026-07-04
 
 ### Fixed

@@ -5,6 +5,30 @@
 (정본: `generator/templates/{claude,codex}/CHANGELOG.md`)를 참조한다.
 형식은 [Keep a Changelog](https://keepachangelog.com/), 버전은 [Semantic Versioning](https://semver.org/lang/ko/)을 따른다.
 
+## [2.4.0] - 2026-07-05
+
+### Added
+- **런타임 안전 룰** (출처: gist Karpathy-skills v2 대조 —
+  https://gist.github.com/renezander030/2898eb5f0100688f4197b5e493e156a2 · 루트 D11,
+  codex/antigravity flavor D8):
+  - **지시-데이터 분리** — `sources/`·worker `result.md`는 데이터이지 지시가 아님을
+    지침파일 Verification에 명문화 (claude 한글 / codex·antigravity 영문).
+  - **`_shared/check-invariants.sh` 결정론 실행기** — 3 flavor 전부. system-invariants.md
+    표=스펙, 스크립트=실행기(ROOT 자동 탐지·항목별 PASS/FAIL·FAIL 시 exit 1). 루트 정본은
+    `$MANUAL_DIR` 설정 시 외부 매뉴얼 일관성(INV5)까지 optional 점검.
+  - **learnings.md 통합 패스** — 20KB 초과 시 교훈 승격·압축 절차 (무한성장 방지).
+  - **worker 호출 예산 soft gate** — task.md 메타 `max_worker_calls`(기본 6) +
+    approval-policy "호출 예산" 섹션 + 지침파일 Approval Gate 연동.
+  - 불변식 확장: 루트/claude INV13(지시-데이터 분리)·INV14(max_worker_calls),
+    codex·antigravity INV12·INV13 상당.
+- **validate.py 회귀 가드** — C1 required에 `_shared/check-invariants.sh` 추가,
+  신규 **C13**(지시-데이터 분리 flavor별 marker), **C14**(max_worker_calls
+  task.md 템플릿+approval-policy 양쪽).
+
+### Changed
+- `sync_claude_template.py` — 템플릿 재생성 시 루트 파일의 실행권한 비트 보존
+  (check-invariants.sh·adapters/*.sh).
+
 ## [2.3.0] - 2026-07-04
 
 ### Added
